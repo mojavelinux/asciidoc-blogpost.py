@@ -18,22 +18,23 @@ import StringIO
 import traceback
 import re
 
-import wordpresslib
+import wordpresslib # http://code.google.com/p/wordpress-library/
 
 
 ######################################################################
-# Default configuration parameters.
-# To override the parameters
-# create a separate configuration file (see --conf-file option).
+# Configuration file parameters.
+# Create a separate configuration file named .blogpost in your $HOME
+# directory or use the --conf-file option (see the
+# blogpost_example.conf example).
 ######################################################################
 
-URL = None  # Wordpress XML_RPC URL (don't forget to append /xmlrpc.php)
-USERNAME = None   # Wordpress login name.
+URL = None      # Wordpress XML_RPC URL (don't forget to append /xmlrpc.php)
+USERNAME = None # Wordpress login name.
 PASSWORD = None # Wordpress password.
 
 
 ######################################################################
-# End of configuration parameters.
+# End of configuration file parameters.
 ######################################################################
 
 

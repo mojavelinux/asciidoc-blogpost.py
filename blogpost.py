@@ -181,12 +181,18 @@ def get_doctitle(filename):
     """
     Return title from AsciiDoc document.
     """
-    title = open(filename).readline().strip()
-    return title
+    #TODO: Skip leading comment blocks.
+    for line in open(filename):
+        # Skip blank lines and comments.
+        if not re.match(r'(^//)|(^\s*$)', line):
+            break
+    else:
+        die('unable to find document title in %s' % filename)
+    return line.strip()
 
 def asciidoc2html(filename):
     """
-    Convert AsciiDoc source file to Wordpress compatible HTML.
+    Convert AsciiDoc source file to Wordpress compatible HTML string.
     """
     return exec_args(
         [
@@ -222,7 +228,7 @@ def blog_client():
     """
     Return initialized Wordpress client.
     """
-    verbose('wordpress client: %s:%s@%s' % (USERNAME, PASSWORD, URL))
+    verbose('wordpress client connection: %s:%s@%s' % (USERNAME, PASSWORD, URL))
     result = wordpresslib.WordPressClient(URL, USERNAME, PASSWORD)
     result.selectBlog(0)
     return result

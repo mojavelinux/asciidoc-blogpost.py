@@ -1,0 +1,7 @@
+syntax: glob
+
+*.{bak,orig,swp,swo,pyc}
+COMMIT
+*.html
+Session.vim
+tags

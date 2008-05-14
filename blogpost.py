@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-A utility for posting AsciiDoc documents to Wordpress blog.
+Wordpress weblog client for AsciiDoc.
 
 Copyright: Stuart Rackham (c) 2008
 License:   MIT
@@ -229,64 +229,90 @@ def blog_client():
     result.selectBlog(0)
     return result
 
+def get_blog(wp, post_id):
+    """
+    Return blog post with ID post_id from Wordpress client wp.
+    """
+    verbose('getting blog post %s...' % post_id)
+    if OPTIONS.dry_run:
+        post = wordpresslib.WordPressPost() # Stub.
+    else:
+        if post_id == '.':
+            post = wp.getLastPost()
+            post_id = post.id
+        else:
+            post = wp.getPost(post_id)
+    return post
+
 def list_blogs():
+    """
+    List recent blog posts.
+    """
     wp = blog_client()
     for post in wp.getRecentPosts(20):
         print '%d: %s: %s' % \
             (post.id, time.strftime('%c', post.date), post.title)
 
-def post_blog():
+def delete_blog(post_id):
     """
-    Update an existing Wordpress blog post if OPTIONS.post_id is not None,
+    Delete blog post with ID post_id.
+    If post_id == '.' delete most recent post.
+    """
+    wp = blog_client()
+    if post_id == '.':
+        post = get_blog(wp, post_id)
+        post_id = post.id
+    infomsg('deleting blog post %d...' % post_id)
+    if not OPTIONS.dry_run:
+        if not wp.deletePost(post_id):
+            die('failed to delete post %d' % post_id)
+
+def post_blog(post_id, blog_file):
+    """
+    Update an existing Wordpress blog post if post_id is not None,
     else create a new post.
+    The blog_file can be either an AsciiDoc file (default) or an
+    HTML file (OPTIONS.html == True).
     The OPTIONS.publish value is only used when creating a new blog,
     the publication status of existing blogs is left unchanged.
     """
     wp = blog_client()
-    if OPTIONS.post_id:
-        verbose('getting blog post %s...' % OPTIONS.post_id)
-        if OPTIONS.dry_run:
-            post = wordpresslib.WordPressPost() # Stub.
-        else:
-            if OPTIONS.post_id == '.':
-                post = wp.getLastPost()
-                OPTIONS.post_id = post.id
-            else:
-                post = wp.getPost(OPTIONS.post_id)
+    if post_id is not None:
+        post = get_blog(wp, post_id)
+        post_id = post.id
     else:
         post = wordpresslib.WordPressPost()
     if OPTIONS.title is not None:
         post.title = OPTIONS.title
     if not OPTIONS.html:
         if OPTIONS.title is None:
-            post.title = get_doctitle(OPTIONS.blog_file)
-        content = asciidoc2html(OPTIONS.blog_file)
+            post.title = get_doctitle(blog_file)
+        content = asciidoc2html(blog_file)
         content = StringIO.StringIO(content)
     else:
-        content = open(OPTIONS.blog_file)
+        content = open(blog_file)
     post.description = html2wordpress(content)
     verbose('title: %s' % post.title)
     verbose('description: %s' % post.description)
     # Create post.
     status = 'published' if OPTIONS.publish else 'unpublished'
-    if OPTIONS.post_id:
-        verbose('updating blog post %s...' % OPTIONS.post_id)
+    if post_id:
+        infomsg('updating blog post %s...' % post_id)
     else:
-        verbose('creating %s blog post...' % status)
+        infomsg('creating %s blog post...' % status)
     if not OPTIONS.dry_run:
-        if OPTIONS.post_id is None:
+        if post_id is None:
             post_id = wp.newPost(post, OPTIONS.publish)
         else:
             # Setting publish to False ensures the publication status is left unchanged.
-            wp.editPost(OPTIONS.post_id, post, False)
-            post_id = OPTIONS.post_id
+            wp.editPost(post_id, post, False)
         print 'post_id: %s' % post_id
 
 
 if __name__ == "__main__":
-    description = """Create or update a Wordpress blog post from AsciiDoc or HTML BLOG_FILE"""
+    description = """Wordpress weblog client for AsciiDoc. COMMAND can be one of: create, delete, list, update. POST_ID is blog post ID number (or . for most recent post). BLOG_FILE is AsciiDoc text file."""
     from optparse import OptionParser
-    parser = OptionParser(usage='usage: %prog [OPTIONS] [BLOG_FILE]',
+    parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [POST_ID] [BLOG_FILE]',
         version='%prog ' + VERSION,
         description=description)
     parser.add_option('-f', '--conf-file',
@@ -295,18 +321,12 @@ if __name__ == "__main__":
     parser.add_option('-p', '--publish',
         action='store_true', dest='publish', default=False,
         help='set blog post status to published')
-    parser.add_option('-l', '--list',
-        action='store_true', dest='list', default=False,
-        help='list recent blog posts then exit')
     parser.add_option('--html',
         action='store_true', dest='html', default=False,
         help='BLOG_FILE is an HTML file not an AsciiDoc file')
     parser.add_option('-t', '--title',
         dest='title', default=None, metavar='TITLE',
         help='blog post title')
-    parser.add_option('-u', '--update',
-        dest='post_id', default=None, metavar='POST_ID',
-        help='id of blog post to be updated (. for most recent)')
     parser.add_option('-n', '--dry-run',
         action='store_true', dest='dry_run', default=False,
         help='show what would have been done')
@@ -316,24 +336,37 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         parser.parse_args(['--help'])
     OPTIONS, args = parser.parse_args()
-    # Validate arguments.
-    if len(args) > 1:
-        die('too many arguments')
-    elif len(args) == 1:
-        blog_file = args[0]
+    # Validate command arguments.
+    if len(args) not in (1,2,3):
+        die('too few or too many arguments')
+    command = args[0]
+    short_commands = {'c':'create', 'd':'delete', 'l':'list', 'u':'update'}
+    if command in short_commands.keys():
+        command = short_commands[command]
+    if command not in ('create','delete','list','update'):
+        die('illegal command: %s' % command)
+    args_len = {'create':2, 'delete':2, 'list':1, 'update':3}
+    if len(args) != args_len[command]:
+        die('too few or too many arguments')
+    blog_file = None
+    post_id = None
+    if command == 'create':
+        blog_file = args[1]
+    elif command == 'delete':
+        post_id = args[1]
+    elif command == 'update':
+        post_id = args[1]
+        blog_file = args[2]
+    if blog_file is not None:
         if not os.path.isfile(blog_file):
             die('BLOG_FILE not found: %s' % blog_file)
         blog_file = os.path.abspath(blog_file)
-        OPTIONS.__dict__['blog_file'] = blog_file
-    else:
-        if not OPTIONS.list:
-            die('must specify BLOG_FILE argument or --list option')
-    if OPTIONS.post_id not in ('.', None):
-        try:
-            OPTIONS.post_id = int(OPTIONS.post_id)
-        except ValueError:
-            die('invalid --post-id: %s' % OPTIONS.post_id)
-    # Read configuration file(s).
+    if post_id is not None:
+        if post_id != '.':
+            try:
+                post_id = int(post_id)
+            except ValueError:
+                die('invalid POST_ID: %s' % post_id)
     # If conf file exists in $HOME directory load it.
     home_dir = os.environ.get('HOME')
     if home_dir is not None:
@@ -344,7 +377,7 @@ if __name__ == "__main__":
         if not os.path.isfile(OPTIONS.conf_file):
             die('configuration file not found: %s' % OPTIONS.conf_file)
         load_conf(OPTIONS.conf_file)
-    # Validate command options.
+    # Validate configuration file parameters.
     if URL is None:
         die('Wordpress XML-RPC URL has not been set in configuration file')
     if USERNAME is None:
@@ -352,7 +385,9 @@ if __name__ == "__main__":
     if PASSWORD is None:
         die('Wordpress PASSWORD has not been set in configuration file')
     # Do the work.
-    if OPTIONS.list:
+    if command == 'list':
         list_blogs()
+    elif command == 'delete':
+        delete_blog(post_id)
     else:
-        post_blog()
+        post_blog(post_id, blog_file)

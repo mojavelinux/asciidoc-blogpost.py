@@ -303,7 +303,7 @@ if __name__ == "__main__":
     parser.add_option('-t', '--title',
         dest='title', default=None, metavar='TITLE',
         help='blog post title')
-    parser.add_option('-i', '--post-id',
+    parser.add_option('-u', '--update',
         dest='post_id', default=None, metavar='POST_ID',
         help='id of blog post to be updated (. for most recent)')
     parser.add_option('-n', '--dry-run',

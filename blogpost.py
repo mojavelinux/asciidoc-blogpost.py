@@ -28,7 +28,7 @@ import wordpresslib # http://code.google.com/p/wordpress-library/
 # blogpost_example.conf example).
 ######################################################################
 
-URL = None      # Wordpress XML_RPC URL (don't forget to append /xmlrpc.php)
+URL = None      # Wordpress XML-RPC URL (don't forget to append /xmlrpc.php)
 USERNAME = None # Wordpress login name.
 PASSWORD = None # Wordpress password.
 

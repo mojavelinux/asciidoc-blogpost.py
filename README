@@ -1,0 +1,14 @@
+blogpost README
+---------------
+Current release is beta quality i.e. works for me but not a lot of
+testing.
+
+TODO
+Latest version at
+
+Requires  the http://code.google.com/p/wordpress-library/[Python
+Wordpress library].  To download and install:
+
+  $ svn co http://wordpress-library.googlecode.com/svn/trunk/ wordpress-library
+  $ cd wordpress-library
+  $ sudo python setup.py install

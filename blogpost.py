@@ -169,8 +169,6 @@ def exec_args(args):
 ###########
 
 OPTIONS = None  # Parsed command-line options OptionParser object.
-# Temp stub object.
-OPTIONS = Namespace(verbose=False, dry_run=False)
 
 
 ####################

@@ -15,15 +15,28 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-Wordpress weblog client for AsciiDoc. COMMAND can be one of: create,
-delete, list, update. POST_ID is blog post ID number (or . for most
-recent post).  BLOG_FILE is AsciiDoc text file.
+Wordpress command-line weblog client for AsciiDoc.  Creates and
+updates weblog entries directly from AsciiDoc source documents. You
+can also delete and list weblog entries from the command-line.
 
 
 COMMANDS
 --------
-TODO
-Commands can be abbreviated using their first letter.
+*c, create*::
+  Create a new weblog post using the contents of 'BLOG_FILE'.
+
+*d, delete*::
+  Delete weblog post with ID number 'POST_ID'.  If 'POST_ID' is '.'
+  then delete the most recent post.
+
+*l, list*::
+  List recent weblog posts.
+
+*u, update*::
+  Update existing weblog post with ID number 'POST_ID' using the
+  contents of 'BLOG_FILE'. If 'POST_ID' is '.' then update the most
+  recent post.
+
 
 OPTIONS
 -------
@@ -34,22 +47,39 @@ OPTIONS
   Show this help message and exit.
 
 *-f, --conf-file*='CONF_FILE'::
-  Configuration file.
+  Use configuration file 'CONF_FILE'. This file is read after the
+  (optional) implicit '$HOME/.blogpost' configuration file.
 
 *-p, --publish*::
-  Set blog post status to published.
+  Set weblog post status to 'published'. If this option is omitted the
+  post publication status is set to 'unpublished'.
+  Applicable to 'create' and 'update' commands.
 
 *--html*::
-  BLOG_FILE is an HTML file not an AsciiDoc file.
+  'BLOG_FILE' is a Wordpress compatible HTML file. The default
+  behavior is to assume the 'BLOG_FILE' is an AsciiDoc file.
+  Applicable to 'create' and 'update' commands.
+
+/////////////////////////////////////////////////////////////////////
+*--page*::
+  Apply command to weblog pages rather than normal weblog posts.
+  Applicable to 'create' and 'update' commands.
+
+/////////////////////////////////////////////////////////////////////
 
 *-t, --title*='TITLE'::
-  Blog post title.
+  Set the weblog post title
+  If this option is omitted the title will be read from the
+  AsciiDoc 'BLOG_FILE'.
+  Applicable to 'create' and 'update' commands.
 
 *-n, --dry-run*::
-  Show what would have been done.
+  Simulate command execution without doing anything, instead report
+  what would have been done.
 
 *-v, --verbose*::
-  Increase verbosity.
+  Print more information about the actions being performed to
+  'stdout'.
 
 
 EXAMPLES

@@ -17,6 +17,7 @@ import subprocess
 import StringIO
 import traceback
 import re
+import xmlrpclib
 
 import wordpresslib # http://code.google.com/p/wordpress-library/
 
@@ -396,6 +397,10 @@ if __name__ == "__main__":
             delete_blog(post_id)
         else:
             post_blog(post_id, blog_file)
-    except wordpresslib.WordPressException, e:
-        die(e.message)
+    except (wordpresslib.WordPressException, xmlrpclib.ProtocolError), e:
+        msg = e.message
+        if not msg:
+            # xmlrpclib.ProtocolError does not set message.
+            msg = e
+        die(msg)
 

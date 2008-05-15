@@ -151,10 +151,10 @@ def load_conf(conf_file):
     """
     execfile(conf_file, globals())
 
-def exec_args(args):
+def exec_args(args, dry_run=False, is_verbose=False):
     verbose('executing: %s' % ' '.join(args))
-    if not OPTIONS.dry_run:
-        if OPTIONS.verbose:
+    if not dry_run:
+        if is_verbose:
             stderr = None
         else:
             stderr = subprocess.PIPE
@@ -209,7 +209,8 @@ def asciidoc2html(filename):
             '--backend', 'wordpress',
             '--out-file', '-',
             filename,
-        ])
+        ],
+        is_verbose=OPTIONS.verbose)
 
 def html2wordpress(src):
     """
@@ -218,17 +219,19 @@ def html2wordpress(src):
     those in <pre></pre> blocks.
     """
     result = ''
-    sep = ''
     for line in src:
         if line.startswith('<pre'):
             while '</pre>' not in line:
                 result += line
                 line = src.next()
             result += line
-            sep = ''
         else:
-            result += sep + line.strip()
-            sep = ' '
+            line = line.strip()
+            if result == '' or result.endswith('>') or line.startswith('<'):
+                sep = ''
+            else:
+                sep = ' '
+            result += sep + line
     return result
 
 def blog_client():
@@ -318,7 +321,9 @@ def post_blog(post_id, blog_file):
         content = open(blog_file)
     post.description = html2wordpress(content)
     verbose('title: %s' % post.title)
-    verbose('description: %s' % post.description)
+    if OPTIONS.verbose:
+        # This can be a lot of output so only show if the user asks.
+        infomsg('description: %s' % post.description)
     # Create post.
     status = 'published' if OPTIONS.publish else 'unpublished'
     if post_id:

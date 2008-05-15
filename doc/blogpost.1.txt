@@ -83,7 +83,8 @@ OPTIONS
 
 *-v, --verbose*::
   Print more information about the actions being performed to
-  'stdout'.
+  'stdout'. Combine this option with '--dry-run' to view the uploaded
+  HTML.
 
 
 EXAMPLES

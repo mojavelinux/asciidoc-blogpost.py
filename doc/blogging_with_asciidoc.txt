@@ -33,7 +33,7 @@ These problems could be solved by installing the
 http://wordpress.org/extend/plugins/wp-unformatted/[WP Unformatted]
 Wordpress plugin. Unfortunately wordpress.com dosn't allow plugins, in
 any case blog editing by pasting into the browser is still tedious.
-Submitting the HTML via the
+Submitting the unmodified HTML via the
 http://codex.wordpress.org/XML-RPC_Support[Wordpress API] doesn't get
 round the problems either.
 

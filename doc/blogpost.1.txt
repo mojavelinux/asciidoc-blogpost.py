@@ -96,18 +96,18 @@ Create, list, update and delete a weblog post:
   blogpost.py delete 29
 
 
+RESOURCES
+---------
+Project repository: http://hg.sharesource.org/blogpost/[]
+
+Python Wordpress library: http://www.blackbirdblog.it/programmazione/progetti/28[]
+
+AsciiDoc: http://www.methods.co.nz/asciidoc/[]
+
+
 AUTHOR
 ------
 Written by Stuart Rackham, <mailto:srackham@methods.co.nz[]>
-
-
-RESOURCES
----------
-Project repository: http:...
-
-Python Wordpress library: http://code.google.com/p/wordpress-library/[]
-
-AsciiDoc: http://www.methods.co.nz/asciidoc/[]
 
 
 COPYING

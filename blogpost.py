@@ -19,7 +19,7 @@ import traceback
 import re
 import xmlrpclib
 
-import wordpresslib # http://code.google.com/p/wordpress-library/
+import wordpresslib # http://www.blackbirdblog.it/programmazione/progetti/28
 
 
 ######################################################################
@@ -245,9 +245,9 @@ def blog_client():
 
 def get_blog(wp, post_id):
     """
-    Return weblog post with ID post_id from Wordpress client wp.
+    Return post with ID post_id from Wordpress client wp.
     """
-    verbose('getting weblog post %s...' % post_id)
+    verbose('getting post %s...' % post_id)
     if OPTIONS.dry_run:
         post = wordpresslib.WordPressPost() # Stub.
     else:
@@ -266,7 +266,7 @@ def get_blog(wp, post_id):
 
 def list_blogs():
     """
-    List recent weblog posts.
+    List recent posts.
     """
     wp = blog_client()
     if OPTIONS.page:
@@ -279,14 +279,14 @@ def list_blogs():
 
 def delete_blog(post_id):
     """
-    Delete weblog post with ID post_id.
+    Delete post with ID post_id.
     If post_id == '.' delete most recent post.
     """
     wp = blog_client()
     if post_id == '.':
         post = get_blog(wp, post_id)
         post_id = post.id
-    infomsg('deleting weblog post %d...' % post_id)
+    infomsg('deleting post %d...' % post_id)
     if not OPTIONS.dry_run:
         if OPTIONS.page:
             if not wp.deletePage(post_id):
@@ -297,7 +297,7 @@ def delete_blog(post_id):
 
 def post_blog(post_id, blog_file):
     """
-    Update an existing Wordpress weblog post if post_id is not None,
+    Update an existing Wordpress post if post_id is not None,
     else create a new post.
     The blog_file can be either an AsciiDoc file (default) or an
     HTML file (OPTIONS.html == True).
@@ -318,17 +318,14 @@ def post_blog(post_id, blog_file):
     else:
         content = open(blog_file)
     post.description = html2wordpress(content)
-    verbose('title: %s' % post.title)
-    verbose('publish: %s' % OPTIONS.publish)
     if OPTIONS.verbose:
         # This can be a lot of output so only show if the user asks.
-        infomsg('description: %s' % post.description)
+        infomsg(post.description)
     # Create post.
     status = 'published' if OPTIONS.publish else 'unpublished'
-    if post_id:
-        infomsg('updating weblog post %s...' % post_id)
-    else:
-        infomsg('creating %s weblog post...' % status)
+    action = 'updating' if post_id else 'creating'
+    post_type = 'page' if OPTIONS.page else 'post'
+    infomsg("%s %s %s '%s'..." % (action, status, post_type, post.title))
     if not OPTIONS.dry_run:
         if post_id is None:
             if OPTIONS.page:
@@ -369,7 +366,7 @@ else:
     parser.add_option('--html',
         action='store_true', dest='html', default=False,
         help='BLOG_FILE is an HTML file not an AsciiDoc file')
-    if 'getPage' in dir(wordpresslib.WordPressClient):
+    if hasattr(wordpresslib.WordPressClient, 'getPage'):
         # We have patched wordpresslib module so enable --page option.
         parser.add_option('--page',
             action='store_true', dest='page', default=False,
@@ -389,7 +386,7 @@ else:
     if len(sys.argv) == 1:
         parser.parse_args(['--help'])
     OPTIONS, args = parser.parse_args()
-    if 'getPage' not in dir(wordpresslib.WordPressClient):
+    if not hasattr(wordpresslib.WordPressClient, 'getPage'):
         OPTIONS.__dict__['page'] = False
     # Validate options and command arguments.
     if len(args) not in (1,2,3):

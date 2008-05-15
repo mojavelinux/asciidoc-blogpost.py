@@ -44,28 +44,39 @@ usage examples:
 
 ---------------------------------------------------------------------
 $ blogpost.py create doc/blogging_with_asciidoc.txt
-creating unpublished blog post...
-id: 29
+creating published post 'Blogging with AsciiDoc'...
+id: 38
 
 $ blogpost.py list
-29: Thu May 15 02:29:39 2008: Blogging with AsciiDoc
+38: Thu May 15 22:36:47 2008: Blogging with AsciiDoc
 
-$ blogpost.py update 29 doc/blogging_with_asciidoc.txt
-updating blog post 29...
-id: 29
+$ blogpost.py update 38 doc/blogging_with_asciidoc.txt
+updating published post 'Blogging with AsciiDoc'...
+id: 38
 
-$ blogpost.py delete 29
-deleting blog post 29...
+$ blogpost.py delete 38
+deleting post 38...
 ---------------------------------------------------------------------
 
 I have used 'blogpost' to post the http://TODO/[AsciiDoc User Guide], a
 long (aroung 100 page) and fairly complicated AsciiDoc document.
 
+To get AsciiDoc output into a Wordpress compatible format:
+
+1. I've written an AsciiDoc `wordpress.conf` configuration file which
+   implements a 'wordpress' backend -- all it contains is a few minor
+   adjustments to the existing AsciiDoc 'html4' backend.
+2. 'blogpost' runs AsciiDoc with the `--backend wordpress
+   --no-header-footer` options.
+3. 'blogpost' then captures the HTML output from AsciiDoc and removes
+   all extraneous line breaks -- the HTML is now Wordpress friendly.
+
 See also:
 
 - http://TODO[blogpost man page]
-- http://TODO[blogpost download page].
 - http://TODO[blogpost README]
+- http://hg.sharesource.org/blogpost/[blogpost Mercurial repository at
+  ShareSource].
 
-'blogpost' uses the http://code.google.com/p/wordpress-library/[Python
+'blogpost' uses the http://www.blackbirdblog.it/programmazione/progetti/28[Python
 Wordpress library] to communicate with the Wordpress XML-RPC API.

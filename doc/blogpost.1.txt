@@ -55,6 +55,11 @@ OPTIONS
   post publication status is set to 'unpublished'.
   Applicable to 'create' and 'update' commands.
 
+*-P, --no-publish*::
+  Set weblog post status to 'unpublished'. If this option is omitted the
+  post publication status is set to 'published'.
+  Applicable to 'create' and 'update' commands.
+
 *--html*::
   'BLOG_FILE' is a Wordpress compatible HTML file. The default
   behavior is to assume the 'BLOG_FILE' is an AsciiDoc file.
@@ -63,7 +68,6 @@ OPTIONS
 /////////////////////////////////////////////////////////////////////
 *--page*::
   Apply command to weblog pages rather than normal weblog posts.
-  Applicable to 'create' and 'update' commands.
 
 /////////////////////////////////////////////////////////////////////
 
@@ -89,14 +93,12 @@ OPTIONS
 
 EXAMPLES
 --------
-TODO
+Create, list, update and delete a weblog post:
 
-INSTALLATION
-------------
-- Download from http://TODO
-- Put 'blogpost.py' in search path.
-- Put 'conf/wordpress.conf' in AsciiDoc install, global configuration
-  or user ('$HOME/.asciidoc') directory.
+  blogpost.py create doc/blogging_with_asciidoc.txt
+  blogpost.py list
+  blogpost.py update 29 doc/blogging_with_asciidoc.txt
+  blogpost.py delete 29
 
 
 PREREQUISITES
@@ -108,6 +110,14 @@ PREREQUISITES
   $ svn co http://wordpress-library.googlecode.com/svn/trunk/ wordpress-library
   $ cd wordpress-library
   $ sudo python setup.py install
+
+
+INSTALLATION
+------------
+- Download from http://TODO
+- Put 'blogpost.py' in search path (optional).
+- Put 'conf/wordpress.conf' in AsciiDoc install, global configuration
+  or user ('$HOME/.asciidoc') directory.
 
 
 AUTHOR

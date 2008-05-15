@@ -18,9 +18,9 @@ reasonable job of rendering AsciiDoc generated HTML.
 
 After a search (albeit brief) I settled on
 http://wordpress.com[Wordpress.com]. There is a problem though:
-Wordpress massages HTML pasted into the Wordpress HTML editor.  Some
-of the rendering problems I observed after pasting AsciiDoc generated
-HTML into Wordpress are:
+Wordpress massages HTML pasted into the Wordpress HTML editor.  Here
+are some rendering problems I observed after pasting
+AsciiDoc-generated HTML into Wordpress:
 
 - Paragraph tags are stripped and `<br />` tags inserted at line
   breaks.
@@ -31,11 +31,11 @@ HTML into Wordpress are:
 
 These problems could be solved by installing the
 http://wordpress.org/extend/plugins/wp-unformatted/[WP Unformatted]
-Wordpress plugin. Unfortunately wordpress.com dosn't allow plugins, in
+Wordpress plugin -- unfortunately wordpress.com dosn't allow plugins, in
 any case blog editing by pasting into the browser is still tedious.
 Submitting the unmodified HTML via the
 http://codex.wordpress.org/XML-RPC_Support[Wordpress API] doesn't get
-round the problems either.
+round these problems either.
 
 My solution was to write 'blogpost', a Wordpress command-line weblog
 client for AsciiDoc. 'blogpost' allows you to create, list, delete and
@@ -45,18 +45,21 @@ usage examples:
 ---------------------------------------------------------------------
 $ blogpost.py create doc/blogging_with_asciidoc.txt
 creating unpublished blog post...
-post_id: 29
+id: 29
 
 $ blogpost.py list
 29: Thu May 15 02:29:39 2008: Blogging with AsciiDoc
 
 $ blogpost.py update 29 doc/blogging_with_asciidoc.txt
 updating blog post 29...
-post_id: 29
+id: 29
 
 $ blogpost.py delete 29
 deleting blog post 29...
 ---------------------------------------------------------------------
+
+I have used 'blogpost' to post the http://TODO/[AsciiDoc User Guide] a
+long (aroung 100 page) and fairly complicated AsciiDoc document.
 
 See also:
 

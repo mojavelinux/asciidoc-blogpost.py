@@ -1,14 +1,11 @@
 blogpost README
----------------
-Current release is beta quality i.e. works for me but not a lot of
-testing.
+===============
+:Author: Stuart Rackham
+
+Current release is beta quality i.e. works for me but has not had a
+lot of testing and has not been tested under MS Windows.
 
 TODO
 Latest version at
 
-Requires  the http://code.google.com/p/wordpress-library/[Python
-Wordpress library].  To download and install:
-
-  $ svn co http://wordpress-library.googlecode.com/svn/trunk/ wordpress-library
-  $ cd wordpress-library
-  $ sudo python setup.py install
+See also blogpost.py man page.

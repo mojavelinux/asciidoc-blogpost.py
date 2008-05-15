@@ -1,0 +1,94 @@
+BLOGPOST(1)
+===========
+Stuart Rackham <srackham@methods.co.nz>
+
+
+NAME
+----
+blogpost - Wordpress weblog client for AsciiDoc
+
+
+SYNOPSIS
+--------
+*blogpost* ['OPTIONS'] 'COMMAND' ['POST_ID'] ['BLOG_FILE']
+
+
+DESCRIPTION
+-----------
+Wordpress weblog client for AsciiDoc. COMMAND can be one of: create,
+delete, list, update. POST_ID is blog post ID number (or . for most
+recent post).  BLOG_FILE is AsciiDoc text file.
+
+
+COMMANDS
+--------
+TODO
+Commands can be abbreviated using their first letter.
+
+OPTIONS
+-------
+*--version*::
+  Show program's version number and exit.
+
+*-h, --help*::
+  Show this help message and exit.
+
+*-f, --conf-file*='CONF_FILE'::
+  Configuration file.
+
+*-p, --publish*::
+  Set blog post status to published.
+
+*--html*::
+  BLOG_FILE is an HTML file not an AsciiDoc file.
+
+*-t, --title*='TITLE'::
+  Blog post title.
+
+*-n, --dry-run*::
+  Show what would have been done.
+
+*-v, --verbose*::
+  Increase verbosity.
+
+
+EXAMPLES
+--------
+TODO
+
+INSTALLATION
+------------
+- Download from http://TODO
+- Put 'blogpost.py' in search path.
+- Put 'conf/wordpress.conf' in AsciiDoc install, global configuration
+  or user ('$HOME/.asciidoc') directory.
+
+
+PREREQUISITES
+-------------
+- http://www.methods.co.nz/asciidoc/[AsciiDoc].
+- The http://code.google.com/p/wordpress-library/[Python
+  Wordpress library]. To download and install:
+
+  $ svn co http://wordpress-library.googlecode.com/svn/trunk/ wordpress-library
+  $ cd wordpress-library
+  $ sudo python setup.py install
+
+
+AUTHOR
+------
+Written by Stuart Rackham, <mailto:srackham@methods.co.nz[]>
+
+
+RESOURCES
+---------
+Project repository: http:...
+
+Python Wordpress library: http://code.google.com/p/wordpress-library/[]
+
+
+COPYING
+-------
+Copyright \(C) 2008 Stuart Rackham. Free use of this software is
+granted under the terms of the MIT License.
+

@@ -1,0 +1,68 @@
+Blogging with AsciiDoc
+======================
+
+//
+// My blog post announcing blogpost.
+//
+
+I make lots of notes using
+http://www.methods.co.nz/asciidoc/[AsciiDoc], the sort of stuff that's
+to minor and/or not rigorous enough for formal publication, but
+possibly useful to others.
+
+So I decided it was about time I started posting my notes to a blog.
+Creating and maintaining posts using the normal browser based
+interfaces was not an option -- just to tedious for words.  So I
+looked around for an HTML friendly blog host that could make a
+reasonable job of rendering AsciiDoc generated HTML.
+
+After a search (albeit brief) I settled on
+http://wordpress.com[Wordpress.com]. There is a problem though:
+Wordpress massages HTML pasted into the Wordpress HTML editor.  Some
+of the rendering problems I observed after pasting AsciiDoc generated
+HTML into Wordpress are:
+
+- Paragraph tags are stripped and `<br />` tags inserted at line
+  breaks.
+- Break tags inserted preceeding inline tags.
+- Tables problems because Wordpress seems to insist on the opening
+  'table' tag occupying a single line.
+- 'Emoticons' seem to be auto-generated.
+
+These problems could be solved by installing the
+http://wordpress.org/extend/plugins/wp-unformatted/[WP Unformatted]
+Wordpress plugin. Unfortunately wordpress.com dosn't allow plugins, in
+any case blog editing by pasting into the browser is still tedious.
+Submitting the HTML via the
+http://codex.wordpress.org/XML-RPC_Support[Wordpress API] doesn't get
+round the problems either.
+
+My solution was to write 'blogpost', a Wordpress command-line weblog
+client for AsciiDoc. 'blogpost' allows you to create, list, delete and
+update blogs written in AsciiDoc from the command-line. Here are some
+usage examples:
+
+---------------------------------------------------------------------
+$ blogpost.py create doc/blogging_with_asciidoc.txt
+creating unpublished blog post...
+post_id: 29
+
+$ blogpost.py list
+29: Thu May 15 02:29:39 2008: Blogging with AsciiDoc
+
+$ blogpost.py update 29 doc/blogging_with_asciidoc.txt
+updating blog post 29...
+post_id: 29
+
+$ blogpost.py delete 29
+deleting blog post 29...
+---------------------------------------------------------------------
+
+See also:
+
+- http://TODO[blogpost man page]
+- http://TODO[blogpost download page].
+- http://TODO[blogpost README]
+
+'blogpost' uses the http://code.google.com/p/wordpress-library/[Python
+Wordpress library] to communicate with the Wordpress XML-RPC API.

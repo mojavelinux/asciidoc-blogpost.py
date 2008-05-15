@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Wordpress weblog client for AsciiDoc.
+Wordpress command-line weblog client for AsciiDoc.
 
 Copyright: Stuart Rackham (c) 2008
 License:   MIT
@@ -27,11 +27,13 @@ import wordpresslib # http://code.google.com/p/wordpress-library/
 # Create a separate configuration file named .blogpost in your $HOME
 # directory or use the --conf-file option (see the
 # blogpost_example.conf example).
+# Alternatively you could just edit the values below.
 ######################################################################
 
 URL = None      # Wordpress XML-RPC URL (don't forget to append /xmlrpc.php)
 USERNAME = None # Wordpress login name.
 PASSWORD = None # Wordpress password.
+ASCIIDOC = None # Path to asciidoc.py (unnecessary if asciidoc is in path).
 
 
 ######################################################################
@@ -195,12 +197,15 @@ def asciidoc2html(filename):
     """
     Convert AsciiDoc source file to Wordpress compatible HTML string.
     """
+    if ASCIIDOC is None:
+        asciidoc = 'asciidoc'
+    else:
+        asciidoc = ASCIIDOC
     return exec_args(
         [
-            'asciidoc',
-            '--conf-file', 'asciidoc_wordpress.conf',
+            asciidoc,
             '--no-header-footer',
-            '--backend', 'html4',
+            '--backend', 'wordpress',
             '--out-file', '-',
             filename,
         ])
@@ -315,7 +320,7 @@ def post_blog(post_id, blog_file):
 
 
 if __name__ == "__main__":
-    description = """Wordpress weblog client for AsciiDoc. COMMAND can be one of: create, delete, list, update. POST_ID is blog post ID number (or . for most recent post). BLOG_FILE is AsciiDoc text file."""
+    description = """Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: create, delete, list, update. POST_ID is blog post ID number (or . for most recent post). BLOG_FILE is AsciiDoc text file."""
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [POST_ID] [BLOG_FILE]',
         version='%prog ' + VERSION,
@@ -400,7 +405,7 @@ if __name__ == "__main__":
     except (wordpresslib.WordPressException, xmlrpclib.ProtocolError), e:
         msg = e.message
         if not msg:
-            # xmlrpclib.ProtocolError does not set message.
+            # xmlrpclib.ProtocolError does not set message attribute.
             msg = e
         die(msg)
 

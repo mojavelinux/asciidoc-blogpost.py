@@ -248,10 +248,16 @@ def get_blog(wp, post_id):
         post = wordpresslib.WordPressPost() # Stub.
     else:
         if post_id == '.':
-            post = wp.getLastPost()
+            if OPTIONS.page:
+                post = wp.getLastPage()
+            else:
+                post = wp.getLastPost()
             post_id = post.id
         else:
-            post = wp.getPost(post_id)
+            if OPTIONS.page:
+                post = wp.getPage(post_id)
+            else:
+                post = wp.getPost(post_id)
     return post
 
 def list_blogs():
@@ -259,7 +265,11 @@ def list_blogs():
     List recent blog posts.
     """
     wp = blog_client()
-    for post in wp.getRecentPosts(20):
+    if OPTIONS.page:
+        posts = wp.getRecentPages()
+    else:
+        posts = wp.getRecentPosts(20)
+    for post in posts:
         print '%d: %s: %s' % \
             (post.id, time.strftime('%c', post.date), post.title)
 
@@ -274,8 +284,12 @@ def delete_blog(post_id):
         post_id = post.id
     infomsg('deleting blog post %d...' % post_id)
     if not OPTIONS.dry_run:
-        if not wp.deletePost(post_id):
-            die('failed to delete post %d' % post_id)
+        if OPTIONS.page:
+            if not wp.deletePage(post_id):
+                die('failed to delete page %d' % post_id)
+        else:
+            if not wp.deletePost(post_id):
+                die('failed to delete post %d' % post_id)
 
 def post_blog(post_id, blog_file):
     """
@@ -312,11 +326,16 @@ def post_blog(post_id, blog_file):
         infomsg('creating %s blog post...' % status)
     if not OPTIONS.dry_run:
         if post_id is None:
-            post_id = wp.newPost(post, OPTIONS.publish)
+            if OPTIONS.page:
+                post_id = wp.newPage(post, OPTIONS.publish)
+            else:
+                post_id = wp.newPost(post, OPTIONS.publish)
         else:
-            # Setting publish to False ensures the publication status is left unchanged.
-            wp.editPost(post_id, post, False)
-        print 'post_id: %s' % post_id
+            if OPTIONS.page:
+                wp.editPage(post_id, post, OPTIONS.publish)
+            else:
+                wp.editPost(post_id, post, OPTIONS.publish)
+        print 'id: %s' % post_id
 
 
 if __name__ == "__main__":
@@ -334,6 +353,13 @@ if __name__ == "__main__":
     parser.add_option('--html',
         action='store_true', dest='html', default=False,
         help='BLOG_FILE is an HTML file not an AsciiDoc file')
+    if 'getPage' in dir(wordpresslib.WordPressClient):
+        # We have patched wordpresslib module so enable --page option.
+        parser.add_option('--page',
+            action='store_true', dest='page', default=False,
+            help='apply command to weblog pages')
+    else:
+        OPTIONS.__dict__['page'] = False
     parser.add_option('-t', '--title',
         dest='title', default=None, metavar='TITLE',
         help='blog post title')

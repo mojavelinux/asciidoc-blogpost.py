@@ -245,9 +245,9 @@ def blog_client():
 
 def get_blog(wp, post_id):
     """
-    Return blog post with ID post_id from Wordpress client wp.
+    Return weblog post with ID post_id from Wordpress client wp.
     """
-    verbose('getting blog post %s...' % post_id)
+    verbose('getting weblog post %s...' % post_id)
     if OPTIONS.dry_run:
         post = wordpresslib.WordPressPost() # Stub.
     else:
@@ -266,7 +266,7 @@ def get_blog(wp, post_id):
 
 def list_blogs():
     """
-    List recent blog posts.
+    List recent weblog posts.
     """
     wp = blog_client()
     if OPTIONS.page:
@@ -279,14 +279,14 @@ def list_blogs():
 
 def delete_blog(post_id):
     """
-    Delete blog post with ID post_id.
+    Delete weblog post with ID post_id.
     If post_id == '.' delete most recent post.
     """
     wp = blog_client()
     if post_id == '.':
         post = get_blog(wp, post_id)
         post_id = post.id
-    infomsg('deleting blog post %d...' % post_id)
+    infomsg('deleting weblog post %d...' % post_id)
     if not OPTIONS.dry_run:
         if OPTIONS.page:
             if not wp.deletePage(post_id):
@@ -297,12 +297,10 @@ def delete_blog(post_id):
 
 def post_blog(post_id, blog_file):
     """
-    Update an existing Wordpress blog post if post_id is not None,
+    Update an existing Wordpress weblog post if post_id is not None,
     else create a new post.
     The blog_file can be either an AsciiDoc file (default) or an
     HTML file (OPTIONS.html == True).
-    The OPTIONS.publish value is only used when creating a new blog,
-    the publication status of existing blogs is left unchanged.
     """
     wp = blog_client()
     if post_id is not None:
@@ -321,15 +319,16 @@ def post_blog(post_id, blog_file):
         content = open(blog_file)
     post.description = html2wordpress(content)
     verbose('title: %s' % post.title)
+    verbose('publish: %s' % OPTIONS.publish)
     if OPTIONS.verbose:
         # This can be a lot of output so only show if the user asks.
         infomsg('description: %s' % post.description)
     # Create post.
     status = 'published' if OPTIONS.publish else 'unpublished'
     if post_id:
-        infomsg('updating blog post %s...' % post_id)
+        infomsg('updating weblog post %s...' % post_id)
     else:
-        infomsg('creating %s blog post...' % status)
+        infomsg('creating %s weblog post...' % status)
     if not OPTIONS.dry_run:
         if post_id is None:
             if OPTIONS.page:
@@ -344,8 +343,19 @@ def post_blog(post_id, blog_file):
         print 'id: %s' % post_id
 
 
-if __name__ == "__main__":
-    description = """Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: create, delete, list, update. POST_ID is blog post ID number (or . for most recent post). BLOG_FILE is AsciiDoc text file."""
+if __name__ != '__main__':
+    # So we can import and use as a library.
+    OPTIONS = Namespace(
+                title = None,
+                publish = True,
+                page = False,
+                html = False,
+                doctype = 'article',
+                dry_run = False,
+                verbose = False,
+            )
+else:
+    description = """Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: create, delete, list, update. POST_ID is weblog post ID number (or . for the most recent post). BLOG_FILE is AsciiDoc text file."""
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [POST_ID] [BLOG_FILE]',
         version='%prog ' + VERSION,
@@ -353,9 +363,9 @@ if __name__ == "__main__":
     parser.add_option('-f', '--conf-file',
         dest='conf_file', default=None, metavar='CONF_FILE',
         help='configuration file')
-    parser.add_option('-p', '--publish',
-        action='store_true', dest='publish', default=False,
-        help='set blog post status to published')
+    parser.add_option('-u', '--unpublish',
+        action='store_false', dest='publish', default=True,
+        help='set post status to unpublished')
     parser.add_option('--html',
         action='store_true', dest='html', default=False,
         help='BLOG_FILE is an HTML file not an AsciiDoc file')
@@ -364,11 +374,9 @@ if __name__ == "__main__":
         parser.add_option('--page',
             action='store_true', dest='page', default=False,
             help='apply command to weblog pages')
-    else:
-        OPTIONS.__dict__['page'] = False
     parser.add_option('-t', '--title',
         dest='title', default=None, metavar='TITLE',
-        help='blog post title')
+        help='post title')
     parser.add_option('-d', '--doctype',
         dest='doctype', default='article', metavar='DOCTYPE',
         help='Asciidoc document type (article, book, manpage')
@@ -381,6 +389,8 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         parser.parse_args(['--help'])
     OPTIONS, args = parser.parse_args()
+    if 'getPage' not in dir(wordpresslib.WordPressClient):
+        OPTIONS.__dict__['page'] = False
     # Validate options and command arguments.
     if len(args) not in (1,2,3):
         die('too few or too many arguments')

@@ -58,7 +58,7 @@ $ blogpost.py delete 29
 deleting blog post 29...
 ---------------------------------------------------------------------
 
-I have used 'blogpost' to post the http://TODO/[AsciiDoc User Guide] a
+I have used 'blogpost' to post the http://TODO/[AsciiDoc User Guide], a
 long (aroung 100 page) and fairly complicated AsciiDoc document.
 
 See also:

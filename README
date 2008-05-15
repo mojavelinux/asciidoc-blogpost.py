@@ -9,3 +9,25 @@ TODO
 Latest version at
 
 See also blogpost.py man page.
+
+PREREQUISITES
+-------------
+- http://www.methods.co.nz/asciidoc/[AsciiDoc].
+- The http://code.google.com/p/wordpress-library/[Python
+  Wordpress library]. To download and install:
+
+  $ svn co http://wordpress-library.googlecode.com/svn/trunk/ wordpress-library
+  $ cd wordpress-library
+  $ sudo python setup.py install
+
+
+INSTALLATION
+------------
+- Download from http://TODO
+- Put `blogpost.py` in search path (optional).
+- Put `conf/wordpress.conf` in AsciiDoc install, global configuration
+  or user (`$HOME/.asciidoc`) directory.
+- Create `$HOME/.blogpost` configuration file (see example
+  `conf/blogpost_example.conf`).
+
+

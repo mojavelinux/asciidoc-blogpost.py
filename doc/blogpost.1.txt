@@ -50,12 +50,7 @@ OPTIONS
   Use configuration file 'CONF_FILE'. This file is read after the
   (optional) implicit '$HOME/.blogpost' configuration file.
 
-*-p, --publish*::
-  Set weblog post status to 'published'. If this option is omitted the
-  post publication status is set to 'unpublished'.
-  Applicable to 'create' and 'update' commands.
-
-*-P, --no-publish*::
+*-u, --unpublish*::
   Set weblog post status to 'unpublished'. If this option is omitted the
   post publication status is set to 'published'.
   Applicable to 'create' and 'update' commands.
@@ -101,25 +96,6 @@ Create, list, update and delete a weblog post:
   blogpost.py delete 29
 
 
-PREREQUISITES
--------------
-- http://www.methods.co.nz/asciidoc/[AsciiDoc].
-- The http://code.google.com/p/wordpress-library/[Python
-  Wordpress library]. To download and install:
-
-  $ svn co http://wordpress-library.googlecode.com/svn/trunk/ wordpress-library
-  $ cd wordpress-library
-  $ sudo python setup.py install
-
-
-INSTALLATION
-------------
-- Download from http://TODO
-- Put 'blogpost.py' in search path (optional).
-- Put 'conf/wordpress.conf' in AsciiDoc install, global configuration
-  or user ('$HOME/.asciidoc') directory.
-
-
 AUTHOR
 ------
 Written by Stuart Rackham, <mailto:srackham@methods.co.nz[]>
@@ -130,6 +106,8 @@ RESOURCES
 Project repository: http:...
 
 Python Wordpress library: http://code.google.com/p/wordpress-library/[]
+
+AsciiDoc: http://www.methods.co.nz/asciidoc/[]
 
 
 COPYING

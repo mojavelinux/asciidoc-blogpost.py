@@ -183,7 +183,7 @@ def get_doctitle(filename):
     """
     #TODO: Skip leading comment blocks.
     for line in open(filename):
-        # Skip blank lines and comments.
+        # Skip blank lines and comment lines.
         if not re.match(r'(^//)|(^\s*$)', line):
             break
     else:
@@ -389,9 +389,13 @@ if __name__ == "__main__":
     if PASSWORD is None:
         die('Wordpress PASSWORD has not been set in configuration file')
     # Do the work.
-    if command == 'list':
-        list_blogs()
-    elif command == 'delete':
-        delete_blog(post_id)
-    else:
-        post_blog(post_id, blog_file)
+    try:
+        if command == 'list':
+            list_blogs()
+        elif command == 'delete':
+            delete_blog(post_id)
+        else:
+            post_blog(post_id, blog_file)
+    except wordpresslib.WordPressException, e:
+        die(e.message)
+

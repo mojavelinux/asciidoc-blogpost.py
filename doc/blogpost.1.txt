@@ -73,6 +73,10 @@ OPTIONS
   AsciiDoc 'BLOG_FILE'.
   Applicable to 'create' and 'update' commands.
 
+*-d, --doctype*='DOCTYPE'::
+  AsciiDoc document type: 'article', 'book' or 'manpage'. Default
+  document type is 'article'.
+
 *-n, --dry-run*::
   Simulate command execution without doing anything, instead report
   what would have been done.

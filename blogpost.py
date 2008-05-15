@@ -205,6 +205,7 @@ def asciidoc2html(filename):
         [
             asciidoc,
             '--no-header-footer',
+            '--doctype', OPTIONS.doctype,
             '--backend', 'wordpress',
             '--out-file', '-',
             filename,
@@ -363,6 +364,9 @@ if __name__ == "__main__":
     parser.add_option('-t', '--title',
         dest='title', default=None, metavar='TITLE',
         help='blog post title')
+    parser.add_option('-d', '--doctype',
+        dest='doctype', default='article', metavar='DOCTYPE',
+        help='Asciidoc document type (article, book, manpage')
     parser.add_option('-n', '--dry-run',
         action='store_true', dest='dry_run', default=False,
         help='show what would have been done')
@@ -372,7 +376,7 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         parser.parse_args(['--help'])
     OPTIONS, args = parser.parse_args()
-    # Validate command arguments.
+    # Validate options and command arguments.
     if len(args) not in (1,2,3):
         die('too few or too many arguments')
     command = args[0]
@@ -403,6 +407,8 @@ if __name__ == "__main__":
                 post_id = int(post_id)
             except ValueError:
                 die('invalid POST_ID: %s' % post_id)
+    if OPTIONS.doctype not in ('article','book','manpage'):
+        die('ivalid DOCTYPE: %s' % OPTIONS.doctype)
     # If conf file exists in $HOME directory load it.
     home_dir = os.environ.get('HOME')
     if home_dir is not None:

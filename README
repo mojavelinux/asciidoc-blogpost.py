@@ -2,6 +2,14 @@ blogpost README
 ===============
 :Author: Stuart Rackham
 
+
+Wordpress command-line weblog client for AsciiDoc.  Creates and
+updates weblog entries directly from AsciiDoc source documents. You
+can also delete and list weblog entries from the command-line.
+
+
+Status
+------
 Current release is beta quality i.e. works for me but has not had a
 lot of testing and has not been tested under MS Windows.
 
@@ -13,10 +21,11 @@ Written and tested on:
 Latest version in http://hg.sharesource.org/blogpost/[Mercurial
 repository at ShareSource].
 
-See also blogpost.py man page.
+See also the http://srackham.wordpress.com/blogpost1/[blogpost.py man
+page].
 
 
-PREREQUISITES
+Prerequisites
 -------------
 - http://www.methods.co.nz/asciidoc/[AsciiDoc].
 - The http://www.blackbirdblog.it/programmazione/progetti/28[Python
@@ -26,10 +35,10 @@ PREREQUISITES
   $ sudo python setup.py install
 
 
-INSTALLATION
+Installation
 ------------
 - Download from http://hg.sharesource.org/blogpost/[Mercurial
-  repository at ShareSource].]
+  repository at ShareSource].
 - Put `blogpost.py` in search path (optional).
 - Put `conf/wordpress.conf` in AsciiDoc install, global configuration
   or user (`$HOME/.asciidoc`) directory.

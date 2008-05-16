@@ -226,12 +226,21 @@ def html2wordpress(src):
                 line = src.next()
             result += line
         else:
+            """
+            # Try to minimize unnecessary spaces.
+            # !!! both fruitless and ultimately unecessary !!!
             line = line.strip()
-            if result == '' or result.endswith('>') or line.startswith('<'):
+            #if result == '' or (result.endswith('>') and line.startswith('<')):
+            block_tag = r'</?((dd)|(dt)|(li)|(p)|(h\d))>'
+            if result == '' \
+                    or re.match(r'.*' + block_tag + r'$', result) \
+                    or re.match(r'^' + block_tag + r'.*', line):
                 sep = ''
             else:
                 sep = ' '
             result += sep + line
+            """
+            result += ' ' + line.strip()
     return result
 
 def blog_client():

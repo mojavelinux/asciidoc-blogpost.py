@@ -338,6 +338,8 @@ def post_blog(post_id, blog_file):
             else:
                 wp.editPost(post_id, post, OPTIONS.publish)
         print 'id: %s' % post_id
+        if post.permaLink:
+            print 'url: %s' % post.permaLink
 
 
 if __name__ != '__main__':

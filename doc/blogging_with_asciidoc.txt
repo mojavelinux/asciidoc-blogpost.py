@@ -53,6 +53,7 @@ $ blogpost.py list
 $ blogpost.py update 38 doc/blogging_with_asciidoc.txt
 updating published post 'Blogging with AsciiDoc'...
 id: 38
+url: http://srackham.wordpress.com/2008/05/38/blogging-with-asciidoc/
 
 $ blogpost.py delete 38
 deleting post 38...

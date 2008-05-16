@@ -5,15 +5,16 @@ blogpost README
 Current release is beta quality i.e. works for me but has not had a
 lot of testing and has not been tested under MS Windows.
 
-Written and tested using:
+Written and tested on:
 
 - Xubuntu 7.10
 - Python 2.5.1
-- 
+
 Latest version in http://hg.sharesource.org/blogpost/[Mercurial
-repository at ShareSource].]
+repository at ShareSource].
 
 See also blogpost.py man page.
+
 
 PREREQUISITES
 -------------

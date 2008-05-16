@@ -243,13 +243,13 @@ def get_blog(wp, post_id):
         post = wordpresslib.WordPressPost() # Stub.
     else:
         if post_id == '.':
-            if OPTIONS.page:
+            if OPTIONS.pages:
                 post = wp.getLastPage()
             else:
                 post = wp.getLastPost()
             post_id = post.id
         else:
-            if OPTIONS.page:
+            if OPTIONS.pages:
                 post = wp.getPage(post_id)
             else:
                 post = wp.getPost(post_id)
@@ -260,7 +260,7 @@ def list_blogs():
     List recent posts.
     """
     wp = blog_client()
-    if OPTIONS.page:
+    if OPTIONS.pages:
         posts = wp.getRecentPages()
     else:
         posts = wp.getRecentPosts(20)
@@ -279,7 +279,7 @@ def delete_blog(post_id):
         post_id = post.id
     infomsg('deleting post %d...' % post_id)
     if not OPTIONS.dry_run:
-        if OPTIONS.page:
+        if OPTIONS.pages:
             if not wp.deletePage(post_id):
                 die('failed to delete page %d' % post_id)
         else:
@@ -315,16 +315,16 @@ def post_blog(post_id, blog_file):
     # Create post.
     status = 'published' if OPTIONS.publish else 'unpublished'
     action = 'updating' if post_id else 'creating'
-    post_type = 'page' if OPTIONS.page else 'post'
+    post_type = 'page' if OPTIONS.pages else 'post'
     infomsg("%s %s %s '%s'..." % (action, status, post_type, post.title))
     if not OPTIONS.dry_run:
         if post_id is None:
-            if OPTIONS.page:
+            if OPTIONS.pages:
                 post_id = wp.newPage(post, OPTIONS.publish)
             else:
                 post_id = wp.newPost(post, OPTIONS.publish)
         else:
-            if OPTIONS.page:
+            if OPTIONS.pages:
                 wp.editPage(post_id, post, OPTIONS.publish)
             else:
                 wp.editPost(post_id, post, OPTIONS.publish)
@@ -338,7 +338,7 @@ if __name__ != '__main__':
     OPTIONS = Namespace(
                 title = None,
                 publish = True,
-                page = False,
+                pages = False,
                 html = False,
                 doctype = 'article',
                 dry_run = False,
@@ -360,16 +360,16 @@ else:
         action='store_true', dest='html', default=False,
         help='BLOG_FILE is an HTML file not an AsciiDoc file')
     if hasattr(wordpresslib.WordPressClient, 'getPage'):
-        # We have patched wordpresslib module so enable --page option.
-        parser.add_option('--page',
-            action='store_true', dest='page', default=False,
-            help='apply command to weblog pages')
+        # We have patched wordpresslib module so enable --pages option.
+        parser.add_option('-p', '--pages',
+            action='store_true', dest='pages', default=False,
+            help='apply COMMAND to weblog pages')
     parser.add_option('-t', '--title',
         dest='title', default=None, metavar='TITLE',
-        help='post title')
+        help='set post TITLE (defaults to AsciiDoc document title)')
     parser.add_option('-d', '--doctype',
         dest='doctype', default='article', metavar='DOCTYPE',
-        help='Asciidoc document type (article, book, manpage')
+        help='Asciidoc document type (article, book, manpage)')
     parser.add_option('-n', '--dry-run',
         action='store_true', dest='dry_run', default=False,
         help='show what would have been done')
@@ -380,7 +380,7 @@ else:
         parser.parse_args(['--help'])
     OPTIONS, args = parser.parse_args()
     if not hasattr(wordpresslib.WordPressClient, 'getPage'):
-        OPTIONS.__dict__['page'] = False
+        OPTIONS.__dict__['pages'] = False
     # Validate options and command arguments.
     if len(args) not in (1,2,3):
         die('too few or too many arguments')

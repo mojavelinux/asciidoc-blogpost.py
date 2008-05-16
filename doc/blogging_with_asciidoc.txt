@@ -27,7 +27,7 @@ AsciiDoc-generated HTML into Wordpress:
 - Break tags inserted preceeding inline tags.
 - Tables problems because Wordpress seems to insist on the opening
   'table' tag occupying a single line.
-- 'Emoticons' seem to be auto-generated.
+- 'Emoticons' are auto-generated.
 
 These problems could be solved by installing the
 http://wordpress.org/extend/plugins/wp-unformatted/[WP Unformatted]
@@ -81,6 +81,6 @@ See also:
 - http://hg.sharesource.org/blogpost/[blogpost Mercurial repository at
   ShareSource].
 
-'blogpost' uses the
+'blogpost' uses Michele Ferretti's
 http://www.blackbirdblog.it/programmazione/progetti/28[Python
 Wordpress library] to communicate with the Wordpress XML-RPC API.

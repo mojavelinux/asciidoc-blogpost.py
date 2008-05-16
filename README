@@ -3,10 +3,10 @@ blogpost README
 :Author: Stuart Rackham
 
 
-'blogpost' is a Wordpress command-line weblog client for AsciiDoc.
-Creates and updates weblog entries directly from AsciiDoc source
-documents. You can also delete and list weblog entries from the
-command-line.
+'blogpost' is a Wordpress command-line weblog client for
+http://www.methods.co.nz/asciidoc/[AsciiDoc].  Creates and updates
+weblog entries directly from AsciiDoc source documents. You can also
+delete and list weblog entries from the command-line.
 
 
 Status
@@ -56,6 +56,6 @@ Installation
 
 Bugs
 ----
-- Under some circumstances WordPress converts three periods to and
-  elipsis character and double dashes to the em dash, there doesn't
+- Under some circumstances WordPress converts three periods to an
+  elipsis character and double dashes to the em dashes, there doesn't
   seem to be a way to turn this off.

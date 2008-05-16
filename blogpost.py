@@ -33,7 +33,7 @@ import wordpresslib # http://www.blackbirdblog.it/programmazione/progetti/28
 URL = None      # Wordpress XML-RPC URL (don't forget to append /xmlrpc.php)
 USERNAME = None # Wordpress login name.
 PASSWORD = None # Wordpress password.
-ASCIIDOC = None # Path to asciidoc.py (unnecessary if asciidoc is in path).
+ASCIIDOC = ['asciidoc'] # Arguments to start asciidoc.
 
 
 ######################################################################
@@ -197,13 +197,9 @@ def asciidoc2html(filename):
     """
     Convert AsciiDoc source file to Wordpress compatible HTML string.
     """
-    if ASCIIDOC is None:
-        asciidoc = 'asciidoc'
-    else:
-        asciidoc = ASCIIDOC
     return exec_args(
+        ASCIIDOC +
         [
-            asciidoc,
             '--no-header-footer',
             '--doctype', OPTIONS.doctype,
             '--backend', 'wordpress',
@@ -226,20 +222,6 @@ def html2wordpress(src):
                 line = src.next()
             result += line
         else:
-            """
-            # Try to minimize unnecessary spaces.
-            # !!! both fruitless and ultimately unecessary !!!
-            line = line.strip()
-            #if result == '' or (result.endswith('>') and line.startswith('<')):
-            block_tag = r'</?((dd)|(dt)|(li)|(p)|(h\d))>'
-            if result == '' \
-                    or re.match(r'.*' + block_tag + r'$', result) \
-                    or re.match(r'^' + block_tag + r'.*', line):
-                sep = ''
-            else:
-                sep = ' '
-            result += sep + line
-            """
             result += ' ' + line.strip()
     return result
 
@@ -363,7 +345,7 @@ if __name__ != '__main__':
                 verbose = False,
             )
 else:
-    description = """Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: create, delete, list, update. POST_ID is weblog post ID number (or . for the most recent post). BLOG_FILE is AsciiDoc text file."""
+    description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: create, delete, list, update. POST_ID is weblog post ID number (or . for the most recent post). BLOG_FILE is AsciiDoc text file."""
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [POST_ID] [BLOG_FILE]',
         version='%prog ' + VERSION,

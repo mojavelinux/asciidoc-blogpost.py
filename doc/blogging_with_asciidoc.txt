@@ -59,8 +59,10 @@ $ blogpost.py delete 38
 deleting post 38...
 ---------------------------------------------------------------------
 
-I have used 'blogpost' to post the http://TODO/[AsciiDoc User Guide], a
-long (aroung 100 page) and fairly complicated AsciiDoc document.
+I have used 'blogpost' to post the
+http://srackham.wordpress.com/asciidoc-user-guide/[AsciiDoc User
+Guide], a long (around 100 page) and fairly complicated AsciiDoc
+document.
 
 To get AsciiDoc output into a Wordpress compatible format:
 
@@ -74,10 +76,11 @@ To get AsciiDoc output into a Wordpress compatible format:
 
 See also:
 
-- http://TODO[blogpost man page]
-- http://TODO[blogpost README]
+- http://srackham.wordpress.com/blogpost1/[blogpost man page]
+- http://srackham.wordpress.com/blogpost-readme/[blogpost README]
 - http://hg.sharesource.org/blogpost/[blogpost Mercurial repository at
   ShareSource].
 
-'blogpost' uses the http://www.blackbirdblog.it/programmazione/progetti/28[Python
+'blogpost' uses the
+http://www.blackbirdblog.it/programmazione/progetti/28[Python
 Wordpress library] to communicate with the Wordpress XML-RPC API.

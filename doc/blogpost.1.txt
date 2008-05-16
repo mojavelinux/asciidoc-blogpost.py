@@ -15,7 +15,7 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-Wordpress command-line weblog client for AsciiDoc.  Creates and
+A Wordpress command-line weblog client for AsciiDoc.  Creates and
 updates weblog entries directly from AsciiDoc source documents. You
 can also delete and list weblog entries from the command-line.
 

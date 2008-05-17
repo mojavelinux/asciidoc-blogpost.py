@@ -46,7 +46,7 @@ Installation
   or user (`$HOME/.asciidoc`) directory.
 - Create `$HOME/.blogpost` configuration file (see example
   `conf/blogpost_example.conf`).
-- Disable 'emoticons' from the Wordpress browser interface:
+- Disable 'emoticons' from the Wordpress browser interface (optional):
   1. Login.
   2. Navigate to 'Settings->Writing->Writing Settings' page.
   3. Uncheck 'Convert emoticons' in the 'Formatting' section (this

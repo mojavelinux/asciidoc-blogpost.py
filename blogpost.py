@@ -225,6 +225,41 @@ def html2wordpress(src):
             result += ' ' + line.strip()
     return result
 
+def process_images(html, image_dir):
+    """
+    Upload images from html file and replace urls with WordPress urls.
+    Source urls are considered relative to image_dir.
+    Return html StringIO object.
+    Assumes maximum of one <img> per line -- this is true of AsciiDoc outputs.
+    """
+    wp = blog_client()
+    images = {}
+    result = StringIO.StringIO()
+    rexp = re.compile(r'<img src="(.*?)"')
+    for line in html:
+        mo = rexp.search(line)
+        if mo:
+            src = mo.group(1)
+            if src in images:
+                url = images[src]
+            else:
+                filename = os.path.join(image_dir, src)
+                if os.path.isfile(filename):
+                    infomsg('uploading: %s...' % filename)
+                    if not OPTIONS.dry_run:
+                        url =  wp.newMediaObject(filename)
+                        print 'url: %s' % url
+                    else:
+                        url = filename  # Dummy value for debugging.
+                    images[src] = url
+                else:
+                    url = src
+                    errmsg('WARNING: missing image file: %s')
+            line = rexp.sub('<img src="%s"' % url, line)
+        result.write(line)
+    result.seek(0)
+    return result
+
 def blog_client():
     """
     Return initialized Wordpress client.
@@ -296,7 +331,7 @@ def post_blog(post_id, blog_file):
     wp = blog_client()
     if post_id is not None:
         post = get_blog(wp, post_id)
-        post_id = post.id
+#        post_id = post.id
     else:
         post = wordpresslib.WordPressPost()
     if OPTIONS.title is not None:
@@ -308,6 +343,8 @@ def post_blog(post_id, blog_file):
         content = StringIO.StringIO(content)
     else:
         content = open(blog_file)
+    image_dir = os.path.abspath(os.path.dirname(blog_file))
+    content = process_images(content, image_dir)
     post.description = html2wordpress(content)
     if OPTIONS.verbose:
         # This can be a lot of output so only show if the user asks.

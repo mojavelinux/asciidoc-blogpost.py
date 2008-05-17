@@ -380,7 +380,12 @@ def post_blog(post_id, blog_file):
         content = open(blog_file)
     images_dir = os.path.abspath(os.path.dirname(blog_file))
     cache_file = os.path.splitext(blog_file)[0] + '.blogpost-cache'
-    content = process_images(content, images_dir, cache_file)
+    if OPTIONS.reset_cache and os.path.isfile(cache_file):
+        infomsg('deleting cache file: %s' % cache_file)
+        if not OPTIONS.dry_run:
+            os.unlink(cache_file)
+    if OPTIONS.images:
+        content = process_images(content, images_dir, cache_file)
     post.description = html2wordpress(content)
     if OPTIONS.verbose:
         # This can be a lot of output so only show if the user asks.
@@ -443,6 +448,12 @@ else:
     parser.add_option('-d', '--doctype',
         dest='doctype', default='article', metavar='DOCTYPE',
         help='Asciidoc document type (article, book, manpage)')
+    parser.add_option('-I', '--no-images',
+        action='store_false', dest='images', default=True,
+        help='do not process document images')
+    parser.add_option('-r', '--reset-cache',
+        action='store_true', dest='reset_cache', default=False,
+        help='clear the images cache prior to processing')
     parser.add_option('-n', '--dry-run',
         action='store_true', dest='dry_run', default=False,
         help='show what would have been done')

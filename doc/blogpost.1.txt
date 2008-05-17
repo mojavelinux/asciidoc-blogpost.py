@@ -60,11 +60,16 @@ OPTIONS
   behavior is to assume the 'BLOG_FILE' is an AsciiDoc file.
   Applicable to 'create' and 'update' commands.
 
-/////////////////////////////////////////////////////////////////////
-*--page*::
-  Apply command to weblog pages rather than normal weblog posts.
+*-p, --pages*::
+  Apply 'COMMAND' to weblog 'Pages' rather than normal weblog 'Posts'.
 
-/////////////////////////////////////////////////////////////////////
+*-I, --no-images*::
+  Do not upload 'BLOG_FILE' images.
+
+*-r, --reset-cache*::
+  Delete the document images cache file prior to processing -- this
+  ensures all images will be uploaded irrespective of whether or not
+  they were previously uploaded.
 
 *-t, --title*='TITLE'::
   Set the weblog post title
@@ -94,6 +99,30 @@ Create, list, update and delete a weblog post:
   blogpost.py list
   blogpost.py update 29 doc/blogging_with_asciidoc.txt
   blogpost.py delete 29
+
+
+IMAGE CACHING
+-------------
+You can upload images to the WordPress server using XML-RPC but there
+is currently no way to list or delete images stored on the server
+using XML-RPC. This leaves us with a bit of a problem -- if we want to
+upload and update document images automatically when we update a post
+we have no way of asking the server whether or not the images have
+been previously uploaded -- new copies of the images will be created
+on the server every time the document is updated. Clearly this is not
+ideal.
+
+'blogpost' relsolves this problem with client-side caching --
+information about previously uploaded images (soure paths, server URLs
+and image file MD5 checksums) are stored in per-document cache files.
+Cache files are stored alongside the source 'BLOG_FILE' but with
+'.blogpost-cache' file name extensions.
+
+'blogpost' uses document image cache files to ensure only new or
+modified image files are uploaded to the WordPress server.
+
+Because the caching is per-document images are not shared between
+documents.
 
 
 RESOURCES

@@ -18,6 +18,8 @@ import StringIO
 import traceback
 import re
 import xmlrpclib
+import pickle
+import md5
 
 import wordpresslib # http://www.blackbirdblog.it/programmazione/progetti/28
 
@@ -225,38 +227,72 @@ def html2wordpress(src):
             result += ' ' + line.strip()
     return result
 
-def process_images(html, image_dir):
+def upload_image(filename):
     """
-    Upload images from html file and replace urls with WordPress urls.
-    Source urls are considered relative to image_dir.
-    Return html StringIO object.
-    Assumes maximum of one <img> per line -- this is true of AsciiDoc outputs.
+    Upload image file and return WordPress url.
     """
     wp = blog_client()
-    images = {}
+    infomsg('uploading: %s...' % filename)
+    if not OPTIONS.dry_run:
+        url =  wp.newMediaObject(filename)
+        print 'url: %s' % url
+    else:
+        url = filename  # Dummy value for debugging.
+    return url
+
+def process_images(html, images_dir, cache_file=None):
+    """
+    Upload images from html file and replace urls with WordPress urls.
+    Source urls are considered relative to images_dir.
+    Return updated html in StringIO object.
+    Assumes maximum of one <img> per line -- this is true of AsciiDoc outputs.
+    Caches the names and checksum of uploaded files in cache_file.
+    If cache_file is None then caching is not used and no cache file written.
+    """
+    if cache_file is None or not os.path.isfile(cache_file):
+        image_cache = {}
+    else:
+        verbose('reading image cache: %s' % cache_file)
+        image_cache = pickle.load(open(cache_file))
     result = StringIO.StringIO()
     rexp = re.compile(r'<img src="(.*?)"')
     for line in html:
         mo = rexp.search(line)
         if mo:
             src = mo.group(1)
-            if src in images:
-                url = images[src]
-            else:
-                filename = os.path.join(image_dir, src)
-                if os.path.isfile(filename):
-                    infomsg('uploading: %s...' % filename)
-                    if not OPTIONS.dry_run:
-                        url =  wp.newMediaObject(filename)
-                        print 'url: %s' % url
-                    else:
-                        url = filename  # Dummy value for debugging.
-                    images[src] = url
+            filename = os.path.join(images_dir, src)
+            if not os.path.isfile(filename):
+                if src in image_cache:
+                    url =  image_cache[src].url
                 else:
                     url = src
-                    errmsg('WARNING: missing image file: %s')
+                errmsg('WARNING: missing image file: %s')
+            else:
+                checksum = md5.new(open(filename).read()).hexdigest()
+                if src in image_cache:
+                    if checksum != image_cache[src].checksum:
+                        url = upload_image(filename)
+                        image_cache[src].url = url
+                        image_cache[src].checksum = checksum
+                    else:
+                        verbose('image unchanged: %s' % filename)
+                        url = image_cache[src].url
+                else:
+                    url = upload_image(filename)
+                    image_cache[src] = Namespace(
+                            url = url,
+                            checksum = checksum,
+                        )
             line = rexp.sub('<img src="%s"' % url, line)
         result.write(line)
+    if len(image_cache) > 0 and cache_file is not None:
+        verbose('writing image cache: %s' % cache_file)
+        if not OPTIONS.dry_run:
+            f = open(cache_file, 'w')
+            try:
+                pickle.dump(image_cache, f)
+            finally:
+                f.close()
     result.seek(0)
     return result
 
@@ -331,7 +367,6 @@ def post_blog(post_id, blog_file):
     wp = blog_client()
     if post_id is not None:
         post = get_blog(wp, post_id)
-#        post_id = post.id
     else:
         post = wordpresslib.WordPressPost()
     if OPTIONS.title is not None:
@@ -343,8 +378,9 @@ def post_blog(post_id, blog_file):
         content = StringIO.StringIO(content)
     else:
         content = open(blog_file)
-    image_dir = os.path.abspath(os.path.dirname(blog_file))
-    content = process_images(content, image_dir)
+    images_dir = os.path.abspath(os.path.dirname(blog_file))
+    cache_file = os.path.splitext(blog_file)[0] + '.blogpost-cache'
+    content = process_images(content, images_dir, cache_file)
     post.description = html2wordpress(content)
     if OPTIONS.verbose:
         # This can be a lot of output so only show if the user asks.

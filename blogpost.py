@@ -346,7 +346,7 @@ class Blogpost(object):
 
     def get_post(self):
         """
-        Return  wordpresslib.WordPressPost with ID post_id from Wordpress
+        Return  wordpresslib.WordPressPost with ID self.id from Wordpress
         server.
         Sets self.id, self.title, self.created_at.
         """
@@ -355,17 +355,10 @@ class Blogpost(object):
         if self.options.dry_run:
             post = wordpresslib.WordPressPost() # Stub.
         else:
-            if self.id == '.':
-                if self.options.pages:
-                    post = self.server.getLastPage()
-                else:
-                    post = self.server.getLastPost()
-                self.id = post.id
+            if self.options.pages:
+                post = self.server.getPage(self.id)
             else:
-                if self.options.pages:
-                    post = self.server.getPage(self.id)
-                else:
-                    post = self.server.getPost(self.id)
+                post = self.server.getPost(self.id)
         self.id = post.id
         self.title = post.title
         self.created_at = post.date
@@ -401,10 +394,7 @@ class Blogpost(object):
     def delete(self):
         """
         Delete post with ID self.id.
-        If post_id == '.' delete most recent post.
         """
-        if self.id == '.':
-            self.get_post()
         infomsg('deleting post %d...' % self.id)
         if not self.options.dry_run:
             if self.options.pages:
@@ -466,6 +456,7 @@ class Blogpost(object):
         # Conditionally upload media files.
         if self.options.media:
             self.process_media()
+        # Make HTML WordPress friendly.
         self.sanitize_html()
         post.description = self.content.read()
         if self.options.verbose:
@@ -504,9 +495,12 @@ if __name__ != '__main__':
                 doctype = 'article',
                 dry_run = False,
                 verbose = False,
+                media = True,
             )
 else:
-    description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: create, delete, info, list, reset, update. POST_ID is weblog post ID number (or . for the most recent post). BLOG_FILE is AsciiDoc text file."""
+    long_commands = ('create','delete','info','list','reset','update')
+    short_commands = {'c':'create', 'd':'delete', 'i':'info', 'l':'list', 'r':'reset', 'u':'update'}
+    description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: %s. BLOG_FILE is AsciiDoc (or optionally HTML) text file. POST_ID is optional weblog post ID number.""" % ', '.join(long_commands)
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [POST_ID] [BLOG_FILE]',
         version='%prog ' + VERSION,
@@ -519,7 +513,7 @@ else:
         help='set post status to unpublished')
     parser.add_option('--html',
         action='store_true', dest='html', default=False,
-        help='BLOG_FILE is an HTML file not an AsciiDoc file')
+        help='BLOG_FILE is an HTML file (not an AsciiDoc file)')
     if hasattr(wordpresslib.WordPressClient, 'getPage'):
         # We have patched wordpresslib module so enable --pages option.
         parser.add_option('-p', '--pages',
@@ -527,7 +521,7 @@ else:
             help='apply COMMAND to weblog pages')
     parser.add_option('-t', '--title',
         dest='title', default=None, metavar='TITLE',
-        help='set post TITLE (defaults to AsciiDoc document title)')
+        help='set post TITLE (defaults to document or cache title)')
     parser.add_option('-d', '--doctype',
         dest='doctype', default='article', metavar='DOCTYPE',
         help='Asciidoc document type (article, book, manpage)')
@@ -549,8 +543,6 @@ else:
     if len(args) not in (1,2,3):
         die('too few or too many arguments')
     command = args[0]
-    long_commands = ('create','delete','info','list','reset','update')
-    short_commands = {'c':'create', 'd':'delete', 'i':'info', 'l':'list', 'r':'reset', 'u':'update'}
     if command in short_commands.keys():
         command = short_commands[command]
     if command not in long_commands:

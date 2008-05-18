@@ -9,6 +9,15 @@ weblog entries directly from AsciiDoc source documents. You can also
 delete and list weblog entries from the command-line.
 
 
+See also
+--------
+- http://srackham.wordpress.com/2008/05/15/blogging-with-asciidoc/[Blogging
+  with Asciidoc].
+- http://srackham.wordpress.com/blogpost1/[blogpost man page]
+- http://hg.sharesource.org/blogpost/[blogpost Mercurial repository at
+  ShareSource].
+
+
 Status
 ------
 This initial release is probably beta quality i.e. works for me but
@@ -30,7 +39,8 @@ page].
 Prerequisites
 -------------
 - http://www.methods.co.nz/asciidoc/[AsciiDoc].
-- The http://www.blackbirdblog.it/programmazione/progetti/28[Python
+- Michele Ferretti’s
+  http://www.blackbirdblog.it/programmazione/progetti/28[Python
   Wordpress library]. To download and install unpack the
   `wordpress.zip` file and then install it:
 

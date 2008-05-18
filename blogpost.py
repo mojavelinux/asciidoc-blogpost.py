@@ -416,6 +416,9 @@ class Blogpost(object):
         self.delete_cache()
 
     def create(self):
+        if self.id is not None:
+            die('''document has been previously posted:
+       use update command (or reset command followed by create command)''')
         self.post()
 
     def update(self):

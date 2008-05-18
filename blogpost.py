@@ -179,6 +179,11 @@ class Media(object):
 
 class Blogpost(object):
 
+    # Blog status values.
+    PUBLISHED = 1
+    UNPUBLISHED = 2
+    STATUS = {PUBLISHED: 'published', UNPUBLISHED: 'unpublished'}
+
     def __init__(self, server_url, username, password, options):
         # options contains the command-line options attributes.
         self.options = options
@@ -186,6 +191,7 @@ class Blogpost(object):
         self.url = None
         self.id = None
         self.title = None
+        self.status = None      # Publication status.
         self.created_at = None
         self.updated_at = None
         self.media = {}  # Contains Media objects keyed by document src path.
@@ -270,6 +276,7 @@ class Blogpost(object):
             self.url = cache.url
             self.id = cache.id
             self.title = cache.title
+            self.status = cache.status
             self.created_at = cache.created_at
             self.updated_at = cache.updated_at
             self.media = cache.media
@@ -286,6 +293,7 @@ class Blogpost(object):
                         url = self.url,
                         id = self.id,
                         title = self.title,
+                        status = self.status,
                         created_at = self.created_at,
                         updated_at = self.updated_at,
                         media = self.media,
@@ -368,16 +376,14 @@ class Blogpost(object):
         """
         Print blog cache information.
         """
-        if os.path.isfile(self.cache_file):
-            print 'title:   %s' % self.title
-            print 'id:      %s' % self.id
-            print 'url:     %s' % self.url
-            print 'created: %s' % time.strftime('%c', self.created_at)
-            print 'updated: %s' % time.strftime('%c', self.updated_at)
-            for media_obj in self.media.values():
-                print 'media:   %s' % media_obj.url
-        else:
-            print 'missing cache file: %s' % self.cache_file
+        print 'title:   %s' % self.title
+        print 'id:      %s' % self.id
+        print 'url:     %s' % self.url
+        print 'status:  %s' % self.STATUS[self.status]
+        print 'created: %s' % time.strftime('%c', self.created_at)
+        print 'updated: %s' % time.strftime('%c', self.updated_at)
+        for media_obj in self.media.values():
+            print 'media:   %s' % media_obj.url
 
     def list(self):
         """
@@ -395,6 +401,7 @@ class Blogpost(object):
         """
         Delete post with ID self.id.
         """
+        assert(self.id is not None)
         infomsg('deleting post %d...' % self.id)
         if not self.options.dry_run:
             if self.options.pages:
@@ -406,14 +413,11 @@ class Blogpost(object):
         self.delete_cache()
 
     def create(self):
-        if self.id is not None:
-            die('''document has been previously posted:
-       use update command (or reset command followed by create command)''')
+        assert(self.id is None)
         self.post()
 
     def update(self):
-        if self.id is None:
-            die('missing cache file: specify POST_ID')
+        assert(self.id is not None)
         self.post()
 
     def post(self):
@@ -478,10 +482,14 @@ class Blogpost(object):
                     self.server.editPage(self.id, post, self.options.publish)
                 else:
                     self.server.editPost(self.id, post, self.options.publish)
-            print 'id: %s' % self.id
-            if post.permaLink:
-                print 'url: %s' % post.permaLink
-                self.url = post.permaLink
+        print 'id: %s' % self.id
+        if post.permaLink:
+            print 'url: %s' % post.permaLink
+            self.url = post.permaLink
+        if self.options.publish:
+            self.status = self.PUBLISHED
+        else:
+            self.status = self.UNPUBLISHED
         self.save_cache()
 
 
@@ -496,13 +504,14 @@ if __name__ != '__main__':
                 dry_run = False,
                 verbose = False,
                 media = True,
+                post_id = None,
             )
 else:
     long_commands = ('create','delete','info','list','reset','update')
     short_commands = {'c':'create', 'd':'delete', 'i':'info', 'l':'list', 'r':'reset', 'u':'update'}
     description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: %s. BLOG_FILE is AsciiDoc (or optionally HTML) text file. POST_ID is optional weblog post ID number.""" % ', '.join(long_commands)
     from optparse import OptionParser
-    parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [POST_ID] [BLOG_FILE]',
+    parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [BLOG_FILE]',
         version='%prog ' + VERSION,
         description=description)
     parser.add_option('-f', '--conf-file',
@@ -528,6 +537,9 @@ else:
     parser.add_option('-M', '--no-media',
         action='store_false', dest='media', default=True,
         help='do not process document media objects')
+    parser.add_option('--post-id', type='int',
+        dest='post_id', default=None, metavar='POST_ID',
+        help='blog post ID number')
     parser.add_option('-n', '--dry-run',
         action='store_true', dest='dry_run', default=False,
         help='show what would have been done')
@@ -540,42 +552,34 @@ else:
     if not hasattr(wordpresslib.WordPressClient, 'getPage'):
         OPTIONS.__dict__['pages'] = False
     # Validate options and command arguments.
-    if len(args) not in (1,2,3):
-        die('too few or too many arguments')
     command = args[0]
     if command in short_commands.keys():
         command = short_commands[command]
     if command not in long_commands:
-        die('invalid command: %s' % command)
+        parser.error('invalid command: %s' % command)
     blog_file = None
-    post_id = None
-    if len(args) == 1 and command in ('list','reset'):
-        # No arguments.
+    if len(args) == 1 and command in ('delete','list'):
+        # No command arguments.
         pass
-    elif len(args) == 2 and command in ('create','info'):
-        # Single argument is BLOG_FILE
+    elif len(args) == 2 and command in ('create','delete','info','reset','update'):
+        # Single command argument BLOG_FILE
         blog_file = args[1]
-    elif len(args) == 2 and command in ('delete','update'):
-        # Single argument can be POST_ID or BLOG_FILE
-        try:
-            post_id = int(args[1])
-        except:
-            blog_file = args[1]
-    elif len(args) == 3 and command in ('update',):
-        # Two arguments: POST_ID followed by BLOG_FILE
-        try:
-            post_id = int(args[1])
-        except:
-            die('invalid POST_ID: %s' % args[1])
-        blog_file = args[2]
     else:
-        die('too few or too many arguments')
+        parser.error('too few or too many arguments')
     if blog_file is not None:
         if not os.path.isfile(blog_file):
             die('missing BLOG_FILE: %s' % blog_file)
         blog_file = os.path.abspath(blog_file)
     if OPTIONS.doctype not in ('article','book','manpage'):
-        die('invalid DOCTYPE: %s' % OPTIONS.doctype)
+        parser.error('invalid DOCTYPE: %s' % OPTIONS.doctype)
+    # --post-id option checks.
+    if command not in ('delete','update') and OPTIONS.post_id is not None:
+        parser.error('--post-id is incompatible with %s command' % command)
+    if command == 'delete':
+        if blog_file is None and OPTIONS.post_id is None:
+            parser.error('specify the BLOG_FILE or use --post-id option')
+        elif blog_file is not None and OPTIONS.post_id is not None:
+            parser.error('specify the BLOG_FILE or use --post-id option but not both')
     # If conf file exists in $HOME directory load it.
     home_dir = os.environ.get('HOME')
     if home_dir is not None:
@@ -598,19 +602,30 @@ else:
         blog = Blogpost(URL, USERNAME, PASSWORD, OPTIONS)
         blog.set_blog_file(blog_file)
         blog.load_cache()
-        if post_id is not None:
-            blog.id = post_id
+        if OPTIONS.post_id is not None:
+            blog.id = OPTIONS.post_id
         if command == 'reset':
+            if not os.path.isfile(blog.cache_file):
+                die('missing cache file: %s' % blog.cache_file)
             blog.delete_cache()
         elif command == 'info':
+            if not os.path.isfile(blog.cache_file):
+                die('missing cache file: %s' % blog.cache_file)
             blog.info()
         elif command == 'list':
             blog.list()
         elif command == 'delete':
+            if blog.id is None:
+                die('missing cache file: specify --post-id instead')
             blog.delete()
         elif command == 'create':
+            if blog.id is not None:
+                die('''document has been previously posted:
+       use update command (or reset command followed by create command)''')
             blog.create()
         elif command == 'update':
+            if blog.id is None:
+                die('missing cache file: specify --post-id instead')
             blog.update()
         else:
             assert(False)

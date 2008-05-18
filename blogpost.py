@@ -20,6 +20,7 @@ import re
 import xmlrpclib
 import pickle
 import md5
+import calendar
 
 import wordpresslib # http://www.blackbirdblog.it/programmazione/progetti/28
 
@@ -192,8 +193,8 @@ class Blogpost(object):
         self.id = None
         self.title = None
         self.status = None      # Publication status.
-        self.created_at = None
-        self.updated_at = None
+        self.created_at = None  # Seconds since epoch in UTC.
+        self.updated_at = None  # Seconds since epoch in UTC.
         self.media = {}  # Contains Media objects keyed by document src path.
         # Client-side blog data.
         self.blog_file = None
@@ -369,7 +370,8 @@ class Blogpost(object):
                 post = self.server.getPost(self.id)
         self.id = post.id
         self.title = post.title
-        self.created_at = post.date
+        # UTC struct_time to UTC timestamp.
+        self.created_at = calendar.timegm(post.date)
         return post
 
     def info(self):
@@ -380,8 +382,10 @@ class Blogpost(object):
         print 'id:      %s' % self.id
         print 'url:     %s' % self.url
         print 'status:  %s' % self.STATUS[self.status]
-        print 'created: %s' % time.strftime('%c', self.created_at)
-        print 'updated: %s' % time.strftime('%c', self.updated_at)
+        print 'created: %s' % time.strftime('%c',
+                time.localtime(self.created_at))
+        print 'updated: %s' % time.strftime('%c',
+                time.localtime(self.updated_at))
         for media_obj in self.media.values():
             print 'media:   %s' % media_obj.url
 
@@ -394,8 +398,12 @@ class Blogpost(object):
         else:
             posts = self.server.getRecentPosts(20)
         for post in posts:
-            print '%d: %s: %s' % \
-                (post.id, time.strftime('%c', post.date), post.title)
+            print '%d: %s: %s' % (
+                post.id,
+                # Convert UTC to local time.
+                time.strftime('%c', time.localtime(calendar.timegm(post.date))),
+                post.title,
+            )
 
     def delete(self):
         """
@@ -435,10 +443,10 @@ class Blogpost(object):
         # Create wordpresslib.WordPressPost object.
         if self.id is not None:
             post = self.get_post()
-            self.updated_at = time.gmtime(time.time())
+            self.updated_at = int(time.time())
         else:
             post = wordpresslib.WordPressPost()
-            self.created_at = time.gmtime(time.time())
+            self.created_at = int(time.time())
             self.updated_at = self.created_at
         # Set post title.
         if self.options.title is not None:

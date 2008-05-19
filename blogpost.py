@@ -372,10 +372,13 @@ class Blogpost(object):
             else:
                 post = self.server.getPost(self.id)
         self.id = post.id
-        self.title = post.title
+#        self.title = post.title
         self.url = post.permaLink
         # UTC struct_time to UTC timestamp.
-        self.created_at = calendar.timegm(post.date)
+        if not self.options.dry_run:
+            self.created_at = calendar.timegm(post.date)
+        else:
+            self.created_at = time.time()   # Dummy current time.
         return post
 
     def info(self):
@@ -463,14 +466,11 @@ class Blogpost(object):
         else:
             post = wordpresslib.WordPressPost()
         # Set post title.
-        if self.options.title is not None:
-            self.title = self.options.title
-        if self.options.html:
-            if not self.title:
+        if not self.title:
+            if self.options.html:
                 die('missing title: use --title option')
-        else:
-            # AsciiDoc blog file.
-            if self.options.title is None:
+            else:
+                # AsciiDoc blog file.
                 self.set_title_from_blog_file()
         post.title = self.title
         assert(self.title)
@@ -548,7 +548,7 @@ else:
             help='apply COMMAND to weblog pages')
     parser.add_option('-t', '--title',
         dest='title', default=None, metavar='TITLE',
-        help='set post TITLE (defaults to document or cache title)')
+        help='set post TITLE')
     parser.add_option('-d', '--doctype',
         dest='doctype', default='article', metavar='DOCTYPE',
         help='Asciidoc document type (article, book, manpage)')
@@ -620,6 +620,8 @@ else:
         blog = Blogpost(URL, USERNAME, PASSWORD, OPTIONS)
         blog.set_blog_file(blog_file)
         blog.load_cache()
+        if OPTIONS.title is not None:
+            blog.title = OPTIONS.title
         if OPTIONS.post_id is not None:
             blog.id = OPTIONS.post_id
         if OPTIONS.pages:

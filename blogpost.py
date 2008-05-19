@@ -212,6 +212,9 @@ class Blogpost(object):
     def is_page(self):
         return self.post_type == 'page'
 
+    def is_published(self):
+        return self.status == 'published'
+
     def set_blog_file(self, blog_file):
         if blog_file is not None:
             self.blog_file = blog_file
@@ -358,7 +361,7 @@ class Blogpost(object):
         """
         Return  wordpresslib.WordPressPost with ID self.id from Wordpress
         server.
-        Sets self.id, self.title, self.created_at.
+        Sets self.id, self.title, self.url, self.created_at.
         """
         verbose('getting %s %s...' % (self.post_type, self.id))
         if self.options.dry_run:
@@ -370,6 +373,7 @@ class Blogpost(object):
                 post = self.server.getPost(self.id)
         self.id = post.id
         self.title = post.title
+        self.url = post.permaLink
         # UTC struct_time to UTC timestamp.
         self.created_at = calendar.timegm(post.date)
         return post
@@ -456,11 +460,8 @@ class Blogpost(object):
         # Create wordpresslib.WordPressPost object.
         if self.id is not None:
             post = self.get_post()
-            self.updated_at = int(time.time())
         else:
             post = wordpresslib.WordPressPost()
-            self.created_at = int(time.time())
-            self.updated_at = self.created_at
         # Set post title.
         if self.options.title is not None:
             self.title = self.options.title
@@ -488,26 +489,25 @@ class Blogpost(object):
             # This can be a lot of output so only show if the user asks.
             infomsg(post.description)
         # Create/update post.
-        status = 'published' if self.options.publish else 'unpublished'
         action = 'updating' if self.id else 'creating'
         infomsg("%s %s %s '%s'..." % \
-                (action, status, self.post_type, self.title))
+                (action, self.status, self.post_type, self.title))
         if not self.options.dry_run:
             if self.id is None:
                 if self.is_page():
-                    self.id = self.server.newPage(post, self.options.publish)
+                    self.id = self.server.newPage(post, self.is_published())
                 else:
-                    self.id = self.server.newPost(post, self.options.publish)
+                    self.id = self.server.newPost(post, self.is_published())
             else:
                 if self.is_page():
-                    self.server.editPage(self.id, post, self.options.publish)
+                    self.server.editPage(self.id, post, self.is_published())
                 else:
-                    self.server.editPost(self.id, post, self.options.publish)
+                    self.server.editPost(self.id, post, self.is_published())
         print 'id: %s' % self.id
-        if post.permaLink:
-            print 'url: %s' % post.permaLink
-            self.url = post.permaLink
-        self.status = status
+        # Get post so we can find what it's url and creation date is.
+        post = self.get_post()
+        print 'url: %s' % post.permaLink
+        self.updated_at = int(time.time())
         self.save_cache()
 
 
@@ -515,14 +515,11 @@ if __name__ != '__main__':
     # So we can import and use as a library.
     OPTIONS = Namespace(
                 title = None,
-                publish = True,
-                pages = False,
                 html = False,
                 doctype = 'article',
                 dry_run = False,
                 verbose = False,
                 media = True,
-                post_id = None,
             )
 else:
     long_commands = ('create','delete','info','list','reset','update')
@@ -535,8 +532,11 @@ else:
     parser.add_option('-f', '--conf-file',
         dest='conf_file', default=None, metavar='CONF_FILE',
         help='configuration file')
+    parser.add_option('-U', '--publish',
+        action='store_true', dest='publish', default=False,
+        help='set post status to published')
     parser.add_option('-u', '--unpublish',
-        action='store_false', dest='publish', default=True,
+        action='store_true', dest='unpublish', default=False,
         help='set post status to unpublished')
     parser.add_option('--html',
         action='store_true', dest='html', default=False,
@@ -627,7 +627,13 @@ else:
                 infomsg('WARNING: document was previously posted as a post')
             blog.post_type = 'page'
         if blog.post_type is None:
-            blog.post_type = 'post' # Default if not in cache.
+            blog.post_type = 'post'     # Default if not in cache.
+        if OPTIONS.publish:
+            blog.status = 'published'
+        if OPTIONS.unpublish:
+            blog.status = 'unpublished'
+        if blog.status is None:
+            blog.status = 'published'   # Default if not in cache.
         if command == 'reset':
             if not os.path.isfile(blog.cache_file):
                 die('missing cache file: %s' % blog.cache_file)

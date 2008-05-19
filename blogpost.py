@@ -570,6 +570,8 @@ else:
     if not hasattr(wordpresslib.WordPressClient, 'getPage'):
         OPTIONS.__dict__['pages'] = False
     # Validate options and command arguments.
+    if OPTIONS.publish and OPTIONS.unpublish:
+        parser.error('--publish and --unpublish are mutually exclusive')
     command = args[0]
     if command in short_commands.keys():
         command = short_commands[command]

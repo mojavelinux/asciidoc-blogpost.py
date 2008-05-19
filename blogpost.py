@@ -188,6 +188,7 @@ class Blogpost(object):
         self.id = None
         self.title = None
         self.status = None  # Publication status ('published','unpublished').
+        self.post_type = None   # 'post' or 'page'.
         self.created_at = None  # Seconds since epoch in UTC.
         self.updated_at = None  # Seconds since epoch in UTC.
         self.media = {}  # Contains Media objects keyed by document src path.
@@ -207,6 +208,9 @@ class Blogpost(object):
         self.server = wordpresslib.WordPressClient(
                 self.server_url, self.username, self.password)
         self.server.selectBlog(0)
+
+    def is_page(self):
+        return self.post_type == 'page'
 
     def set_blog_file(self, blog_file):
         if blog_file is not None:
@@ -273,6 +277,7 @@ class Blogpost(object):
             self.id = cache.id
             self.title = cache.title
             self.status = cache.status
+            self.post_type = cache.post_type
             self.created_at = cache.created_at
             self.updated_at = cache.updated_at
             self.media = cache.media
@@ -290,6 +295,7 @@ class Blogpost(object):
                         id = self.id,
                         title = self.title,
                         status = self.status,
+                        post_type = self.post_type,
                         created_at = self.created_at,
                         updated_at = self.updated_at,
                         media = self.media,
@@ -354,12 +360,11 @@ class Blogpost(object):
         server.
         Sets self.id, self.title, self.created_at.
         """
-        post_type = 'page' if self.options.pages else 'post'
-        verbose('getting %s %s...' % (post_type, self.id))
+        verbose('getting %s %s...' % (self.post_type, self.id))
         if self.options.dry_run:
             post = wordpresslib.WordPressPost() # Stub.
         else:
-            if self.options.pages:
+            if self.is_page():
                 post = self.server.getPage(self.id)
             else:
                 post = self.server.getPost(self.id)
@@ -377,6 +382,7 @@ class Blogpost(object):
         print 'id:      %s' % self.id
         print 'url:     %s' % self.url
         print 'status:  %s' % self.status
+        print 'type:    %s' % self.post_type
         print 'created: %s' % time.strftime('%c',
                 time.localtime(self.created_at))
         print 'updated: %s' % time.strftime('%c',
@@ -389,16 +395,14 @@ class Blogpost(object):
         List recent posts.
         Information from WordPress server not from client-side cache.
         """
-        if self.options.pages:
+        if self.is_page():
             posts = self.server.getRecentPages()
-            post_type = 'page'
         else:
             posts = self.server.getRecentPosts(20)
-            post_type = 'post'
         for post in posts:
             print 'title:   %s' % post.title
             print 'id:      %s' % post.id
-            print 'type:    %s' % post_type
+            print 'type:    %s' % self.post_type
             print 'url:     %s' % post.permaLink
             # Convert UTC to local time.
             print 'created: %s' % \
@@ -421,7 +425,7 @@ class Blogpost(object):
         assert(self.id is not None)
         infomsg('deleting post %d...' % self.id)
         if not self.options.dry_run:
-            if self.options.pages:
+            if self.is_page():
                 if not self.server.deletePage(self.id):
                     die('failed to delete page %d' % self.id)
             else:
@@ -486,16 +490,16 @@ class Blogpost(object):
         # Create/update post.
         status = 'published' if self.options.publish else 'unpublished'
         action = 'updating' if self.id else 'creating'
-        post_type = 'page' if self.options.pages else 'post'
-        infomsg("%s %s %s '%s'..." % (action, status, post_type, post.title))
+        infomsg("%s %s %s '%s'..." % \
+                (action, status, self.post_type, self.title))
         if not self.options.dry_run:
             if self.id is None:
-                if self.options.pages:
+                if self.is_page():
                     self.id = self.server.newPage(post, self.options.publish)
                 else:
                     self.id = self.server.newPost(post, self.options.publish)
             else:
-                if self.options.pages:
+                if self.is_page():
                     self.server.editPage(self.id, post, self.options.publish)
                 else:
                     self.server.editPost(self.id, post, self.options.publish)
@@ -618,6 +622,10 @@ else:
         blog.load_cache()
         if OPTIONS.post_id is not None:
             blog.id = OPTIONS.post_id
+        if OPTIONS.pages:
+            blog.post_type = 'page'
+        if blog.post_type is None:
+            blog.post_type = 'post' # Default if not in cache.
         if command == 'reset':
             if not os.path.isfile(blog.cache_file):
                 die('missing cache file: %s' % blog.cache_file)

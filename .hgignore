@@ -1,6 +1,6 @@
 syntax: glob
 
-*.{bak,orig,swp,swo,pyc}
+*.{bak,orig,swp,swo,pyc,blogpost}
 COMMIT
 *.html
 Session.vim

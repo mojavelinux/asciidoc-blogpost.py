@@ -392,18 +392,28 @@ class Blogpost(object):
     def list(self):
         """
         List recent posts.
+        Information from WordPress server not from client-side cache.
         """
         if self.options.pages:
             posts = self.server.getRecentPages()
         else:
             posts = self.server.getRecentPosts(20)
         for post in posts:
-            print '%d: %s: %s' % (
+            print 'title:   %s' % post.title
+            print 'id:      %s' % post.id
+            print 'url:     %s' % post.permaLink
+            print 'created: %s' % \
+                time.strftime('%c', time.localtime(calendar.timegm(post.date)))
+            print
+            """
+            print '%d: %s: %s: %s' % (
                 post.id,
                 # Convert UTC to local time.
                 time.strftime('%c', time.localtime(calendar.timegm(post.date))),
                 post.title,
+                post.permaLink,
             )
+            """
 
     def delete(self):
         """

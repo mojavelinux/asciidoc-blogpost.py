@@ -189,6 +189,7 @@ class Blogpost(object):
         self.title = None
         self.status = None  # Publication status ('published','unpublished').
         self.post_type = None   # 'post' or 'page'.
+        self.doctype = None     # 'article','book','manpage' or 'html'.
         self.created_at = None  # Seconds since epoch in UTC.
         self.updated_at = None  # Seconds since epoch in UTC.
         self.media = {}  # Contains Media objects keyed by document src path.
@@ -209,6 +210,9 @@ class Blogpost(object):
                 self.server_url, self.username, self.password)
         self.server.selectBlog(0)
 
+    def is_html(self):
+        return self.doctype == 'html'
+
     def is_page(self):
         return self.post_type == 'page'
 
@@ -225,7 +229,7 @@ class Blogpost(object):
         """
         Set title attribute from title in blog file.
         """
-        if not self.options.html:
+        if not self.is_html():
             # AsciiDoc blog file.
             #TODO: Skip leading comment blocks.
             for line in open(self.blog_file):
@@ -244,7 +248,7 @@ class Blogpost(object):
             ASCIIDOC +
             [
                 '--no-header-footer',
-                '--doctype', self.options.doctype,
+                '--doctype', self.doctype,
                 '--backend', 'wordpress',
                 '--out-file', '-',
                 self.blog_file,
@@ -281,6 +285,7 @@ class Blogpost(object):
             self.title = cache.title
             self.status = cache.status
             self.post_type = cache.post_type
+            self.doctype = cache.doctype
             self.created_at = cache.created_at
             self.updated_at = cache.updated_at
             self.media = cache.media
@@ -299,6 +304,7 @@ class Blogpost(object):
                         title = self.title,
                         status = self.status,
                         post_type = self.post_type,
+                        doctype = self.doctype,
                         created_at = self.created_at,
                         updated_at = self.updated_at,
                         media = self.media,
@@ -389,6 +395,7 @@ class Blogpost(object):
         print 'url:     %s' % self.url
         print 'status:  %s' % self.status
         print 'type:    %s' % self.post_type
+        print 'doctype: %s' % self.doctype
         print 'created: %s' % time.strftime('%c',
                 time.localtime(self.created_at))
         print 'updated: %s' % time.strftime('%c',
@@ -442,8 +449,8 @@ class Blogpost(object):
         """
         Update an existing Wordpress post if post_id is not None,
         else create a new post.
-        The blog_file can be either an AsciiDoc file (default) or an
-        HTML file (self.options.html == True).
+        The blog_file can be either an AsciiDoc file or an
+        HTML file (self.doctype == True).
         """
         # Only update if blog file has changed.
         checksum = md5.new(open(self.blog_file).read()).hexdigest()
@@ -457,7 +464,7 @@ class Blogpost(object):
             post = wordpresslib.WordPressPost()
         # Set post title.
         if not self.title:
-            if self.options.html:
+            if self.is_html():
                 die('missing title: use --title option')
             else:
                 # AsciiDoc blog file.
@@ -465,7 +472,7 @@ class Blogpost(object):
         post.title = self.title
         assert(self.title)
         # Generate blog content from blog file.
-        if self.options.html:
+        if self.is_html():
             self.content = open(self.blog_file)
         else:
             self.asciidoc2html()
@@ -504,8 +511,6 @@ class Blogpost(object):
 if __name__ != '__main__':
     # So we can import and use as a library.
     OPTIONS = Namespace(
-                html = False,
-                doctype = 'article',
                 dry_run = False,
                 verbose = False,
                 media = True,
@@ -527,9 +532,6 @@ else:
     parser.add_option('-u', '--unpublish',
         action='store_true', dest='unpublish', default=False,
         help='set post status to unpublished')
-    parser.add_option('--html',
-        action='store_true', dest='html', default=False,
-        help='BLOG_FILE is an HTML file (not an AsciiDoc file)')
     if hasattr(wordpresslib.WordPressClient, 'getPage'):
         # We have patched wordpresslib module so enable --pages option.
         parser.add_option('-p', '--pages',
@@ -539,8 +541,8 @@ else:
         dest='title', default=None, metavar='TITLE',
         help='set post TITLE')
     parser.add_option('-d', '--doctype',
-        dest='doctype', default='article', metavar='DOCTYPE',
-        help='Asciidoc document type (article, book, manpage)')
+        dest='doctype', default=None, metavar='DOCTYPE',
+        help='document type (article, book, manpage, html)')
     parser.add_option('-M', '--no-media',
         action='store_false', dest='media', default=True,
         help='do not process document media objects')
@@ -579,7 +581,7 @@ else:
         if not os.path.isfile(blog_file):
             die('missing BLOG_FILE: %s' % blog_file)
         blog_file = os.path.abspath(blog_file)
-    if OPTIONS.doctype not in ('article','book','manpage'):
+    if OPTIONS.doctype not in (None, 'article','book','manpage','html'):
         parser.error('invalid DOCTYPE: %s' % OPTIONS.doctype)
     # --post-id option checks.
     if command not in ('delete','update') and OPTIONS.post_id is not None:
@@ -627,6 +629,10 @@ else:
             blog.status = 'unpublished'
         if blog.status is None:
             blog.status = 'published'   # Default if not in cache.
+        if OPTIONS.doctype is not None:
+            blog.doctype = OPTIONS.doctype
+        if blog.doctype is None:
+            blog.doctype = 'article'    # Default if not in cache.
         if command == 'reset':
             if not os.path.isfile(blog.cache_file):
                 die('missing cache file: %s' % blog.cache_file)

@@ -372,7 +372,6 @@ class Blogpost(object):
             else:
                 post = self.server.getPost(self.id)
         self.id = post.id
-#        self.title = post.title
         self.url = post.permaLink
         # UTC struct_time to UTC timestamp.
         if not self.options.dry_run:
@@ -415,15 +414,6 @@ class Blogpost(object):
             print 'created: %s' % \
                 time.strftime('%c', time.localtime(calendar.timegm(post.date)))
             print
-            """
-            print '%d: %s: %s: %s' % (
-                post.id,
-                # Convert UTC to local time.
-                time.strftime('%c', time.localtime(calendar.timegm(post.date))),
-                post.title,
-                post.permaLink,
-            )
-            """
 
     def delete(self):
         """
@@ -514,7 +504,6 @@ class Blogpost(object):
 if __name__ != '__main__':
     # So we can import and use as a library.
     OPTIONS = Namespace(
-                title = None,
                 html = False,
                 doctype = 'article',
                 dry_run = False,

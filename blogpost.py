@@ -180,11 +180,6 @@ class Media(object):
 
 class Blogpost(object):
 
-    # Blog status values.
-    PUBLISHED = 1
-    UNPUBLISHED = 2
-    STATUS = {PUBLISHED: 'published', UNPUBLISHED: 'unpublished'}
-
     def __init__(self, server_url, username, password, options):
         # options contains the command-line options attributes.
         self.options = options
@@ -192,7 +187,7 @@ class Blogpost(object):
         self.url = None
         self.id = None
         self.title = None
-        self.status = None      # Publication status.
+        self.status = None  # Publication status ('published','unpublished').
         self.created_at = None  # Seconds since epoch in UTC.
         self.updated_at = None  # Seconds since epoch in UTC.
         self.media = {}  # Contains Media objects keyed by document src path.
@@ -381,7 +376,7 @@ class Blogpost(object):
         print 'title:   %s' % self.title
         print 'id:      %s' % self.id
         print 'url:     %s' % self.url
-        print 'status:  %s' % self.STATUS[self.status]
+        print 'status:  %s' % self.status
         print 'created: %s' % time.strftime('%c',
                 time.localtime(self.created_at))
         print 'updated: %s' % time.strftime('%c',
@@ -396,12 +391,16 @@ class Blogpost(object):
         """
         if self.options.pages:
             posts = self.server.getRecentPages()
+            post_type = 'page'
         else:
             posts = self.server.getRecentPosts(20)
+            post_type = 'post'
         for post in posts:
             print 'title:   %s' % post.title
             print 'id:      %s' % post.id
+            print 'type:    %s' % post_type
             print 'url:     %s' % post.permaLink
+            # Convert UTC to local time.
             print 'created: %s' % \
                 time.strftime('%c', time.localtime(calendar.timegm(post.date)))
             print
@@ -504,10 +503,7 @@ class Blogpost(object):
         if post.permaLink:
             print 'url: %s' % post.permaLink
             self.url = post.permaLink
-        if self.options.publish:
-            self.status = self.PUBLISHED
-        else:
-            self.status = self.UNPUBLISHED
+        self.status = status
         self.save_cache()
 
 

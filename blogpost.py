@@ -623,6 +623,8 @@ else:
         if OPTIONS.post_id is not None:
             blog.id = OPTIONS.post_id
         if OPTIONS.pages:
+            if blog.post_type == 'post':
+                infomsg('WARNING: document was previously posted as a post')
             blog.post_type = 'page'
         if blog.post_type is None:
             blog.post_type = 'post' # Default if not in cache.

@@ -8,7 +8,7 @@ Email:     srackham@methods.co.nz
 
 """
 
-VERSION = '0.1.0'
+VERSION = '0.9.0'
 
 import sys
 import os
@@ -388,7 +388,7 @@ class Blogpost(object):
 
     def info(self):
         """
-        Print blog cache information.
+        Print post cache information.
         """
         print 'title:   %s' % self.title
         print 'id:      %s' % self.id

@@ -357,8 +357,6 @@ class Blogpost(object):
                             url =  media_obj.url
                         else:
                             url = src
-                        if not tag.startswith('a '):
-                            errmsg('WARNING: missing media file: %s' % media_file)
                     else:
                         if not media_obj:
                             media_obj = Media(media_file)

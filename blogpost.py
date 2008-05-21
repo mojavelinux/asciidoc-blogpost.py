@@ -331,34 +331,41 @@ class Blogpost(object):
         with WordPress urls.
 
         Source urls are considered relative to self.media_dir.
-        Assumes maximum of one <img> per line -- this is true of AsciiDoc
+        Processes <a> and <img> tags provided they reference files with
+        valid media file name extensions.
+
+        Assumes maximum of one media tag per line -- this is true of AsciiDoc
         outputs.
 
         Caches the names and checksum of uploaded files in self.cache_file.  If
         self.cache_file is None then caching is not used and no cache file
         written.
         """
+        media_exts = ('gif','jpg','png','mp3','bmp','ogg')
         result = StringIO.StringIO()
-        rexp = re.compile(r'<img src="(.*?)"')
+        rexp = re.compile(r'<(?P<tag>(a href)|(img src))="(?P<src>.+?)"')
         for line in self.content:
             mo = rexp.search(line)
             if mo:
-                src = mo.group(1)
-                media_obj = self.media.get(src)
-                media_file = os.path.join(self.media_dir, src)
-                if not os.path.isfile(media_file):
-                    if media_obj:
-                        url =  media_obj.url
+                tag = mo.group('tag')
+                src = mo.group('src')
+                if os.path.splitext(src)[1][1:].lower() in media_exts:
+                    media_obj = self.media.get(src)
+                    media_file = os.path.join(self.media_dir, src)
+                    if not os.path.isfile(media_file):
+                        if media_obj:
+                            url =  media_obj.url
+                        else:
+                            url = src
+                        if not tag.startswith('a '):
+                            errmsg('WARNING: missing media file: %s' % media_file)
                     else:
-                        url = src
-                    errmsg('WARNING: missing media file: %s' % media_file)
-                else:
-                    if not media_obj:
-                        media_obj = Media(media_file)
-                        self.media[src] = media_obj
-                    media_obj.upload(self)
-                    url =  media_obj.url
-                line = rexp.sub('<img src="%s"' % url, line)
+                        if not media_obj:
+                            media_obj = Media(media_file)
+                            self.media[src] = media_obj
+                        media_obj.upload(self)
+                        url =  media_obj.url
+                    line = rexp.sub('<%s="%s"' % (tag, url), line)
             result.write(line)
         result.seek(0)
         self.content = result

@@ -5,7 +5,7 @@ Stuart Rackham <srackham@methods.co.nz>
 
 NAME
 ----
-blogpost - Wordpress weblog client for AsciiDoc
+blogpost - WordPress weblog client for AsciiDoc
 
 
 SYNOPSIS
@@ -15,11 +15,11 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-A Wordpress command-line weblog client for AsciiDoc.  Creates and
+A WordPress command-line weblog client for AsciiDoc.  Creates and
 updates weblog entries directly from AsciiDoc source documents. You
 can also delete and list weblog entries from the command-line.
 
-- Manages both Posts and Pages.
+- Manages WordPress Posts and Pages.
 - Automatically posts blog file images.
 - Only posts new or modified blog images.
 
@@ -91,7 +91,7 @@ OPTIONS
 
 *-d, --doctype*='DOCTYPE'::
   Specifies the type of 'BLOG_FILE'. Allowed values are 'html'
-  (Wordpress compatible HTML file) or an AsciiDoc document type
+  (WordPress compatible HTML file) or an AsciiDoc document type
   ('article', 'book' or 'manpage'). Default document type is
   'article'.
   Applicable to 'create' and 'update' commands.
@@ -112,6 +112,44 @@ that once a weblog post has been created you won't need to use them in
 subsequent commands unless you decide to change them.
 
 
+METADATA CACHING
+----------------
+You can upload images to the WordPress server using XML-RPC but there
+is currently no way to programmatically list or delete images held on
+the server.  Blindly uploading new copies of the images to the server
+every time the document is updated is an unacceptable.
+
+To overcome this problem 'blogpost' retains information about
+previously uploaded images (source paths, server URLs and image file
+MD5 checksums) in client-side per-document cache files.  Cache files
+are stored in the same directory as the source 'BLOG_FILE' but with
+'.blogpost' file name extensions. A document's cache file is read
+before 'blogpost' runs a command and is updated after running 'create'
+and 'update' commands.  The 'delete' and 'reset' commands delete a
+document's cache file.
+
+'blogpost' uses cache files to ensure only new or modified image files
+are uploaded to the WordPress server.  Because the caching is on a
+per-document basis, images are not shared between documents.
+
+In addition to storing media metadata, blogpost cache files also store
+the weblog post ID, URL, title, creation and update timestamps along
+with the last used value of many of the 'blogpost' command options.
+This is very handy, it means you don't have to remember the weblog
+post ID or the options you used to create the weblog when you run the
+'update' command (unless of course you want to change something).
+
+
+POSTS AND PAGES
+---------------
+There are two types of WordPress content, 'Posts' and 'Pages'.  A
+'Post' is the WordPress term for a regular blog entry whereas a 'Page'
+(sometimes called a 'static page') is an entry that lies outside the
+normal blog chronology. WordPress manages Posts and Pages separately
+-- use the '--pages' option to differentiate between the two. See
+http://codex.wordpress.org/Pages[] for a detailed explanation.
+
+
 EXAMPLES
 --------
 Create, list, update and delete a weblog post:
@@ -123,41 +161,11 @@ Create, list, update and delete a weblog post:
   blogpost.py delete doc/blogging_with_asciidoc.txt
 
 
-METADATA CACHING
-----------------
-You can upload images to the WordPress server using XML-RPC but there
-is currently no way to list or delete images stored on the server
-using XML-RPC. This leaves us with a bit of a problem if we want to
-upload and update document images on the server automatically because
-we have no way of asking the server whether or not the images have
-been previously uploaded -- simply uploading new copies of the images
-to the server every time the document is updated is an unacceptable.
-
-'blogpost' relsolves this problem by caching information about
-previously uploaded images (source paths, server URLs and image file
-MD5 checksums) per-document cache files.  Cache files are stored
-alongside the source 'BLOG_FILE' but with '.blogpost' file name
-extensions. A document's cache file is read before 'blogpost' runs a
-command and is updated after running 'create' and 'update' commands.
-The 'delete' and 'reset' commands delete a document's cache file.
-
-'blogpost' uses cache files to ensure only new or modified image files
-are uploaded to the WordPress server.  Because the caching is
-per-document images are not shared between documents.
-
-In addition to storing media metadata blogpost cache files also store
-the weblog post ID, URL, title, creation and update timestamps along
-with the last used value of many of the 'blogpost' command options.
-This is very handy, it means you don't have to remember the weblog
-post ID or the options you used to create the weblog when you run the
-'update' command (unless of course you want to change something).
-
-
 RESOURCES
 ---------
 Project repository: http://hg.sharesource.org/blogpost/[]
 
-Python Wordpress library: http://www.blackbirdblog.it/programmazione/progetti/28[]
+Python WordPress library: http://www.blackbirdblog.it/programmazione/progetti/28[]
 
 AsciiDoc: http://www.methods.co.nz/asciidoc/[]
 

@@ -426,12 +426,14 @@ class Blogpost(object):
         else:
             posts = self.server.getRecentPosts(20)
         for post in posts:
-            print 'title:   %s' % post.title
-            print 'id:      %s' % post.id
-            print 'type:    %s' % self.post_type
-            print 'url:     %s' % post.permaLink
+            print 'title:      %s' % post.title
+            if not self.is_page():
+                print 'categories: %s' % ','.join(post.categories)
+            print 'id:         %s' % post.id
+            print 'type:       %s' % self.post_type
+            print 'url:        %s' % post.permaLink
             # Convert UTC to local time.
-            print 'created: %s' % \
+            print 'created:    %s' % \
                 time.strftime('%c', time.localtime(calendar.timegm(post.date)))
             print
 

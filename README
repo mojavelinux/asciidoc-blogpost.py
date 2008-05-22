@@ -5,14 +5,16 @@ blogpost README
 
 'blogpost' is a Wordpress command-line weblog client for
 http://www.methods.co.nz/asciidoc/[AsciiDoc].  Creates and updates
-weblog entries directly from AsciiDoc source documents. You can also
-delete and list weblog entries from the command-line.
+weblog entries directly from AsciiDoc (or HTML) source documents. You
+can also delete and list weblog entries from the command-line.
+
+- Manages WordPress Posts and Pages.
+- Automatically uploads media files (images, video, audio).
+- Only posts new or modified media files.
 
 
 See also
 --------
-- http://srackham.wordpress.com/2008/05/15/blogging-with-asciidoc/[Blogging
-  with Asciidoc].
 - http://srackham.wordpress.com/blogpost1/[blogpost man page]
 - http://hg.sharesource.org/blogpost/[blogpost Mercurial repository at
   ShareSource].
@@ -32,19 +34,21 @@ Written and tested under:
 Latest version in http://hg.sharesource.org/blogpost/[Mercurial
 repository at ShareSource].
 
-See also the http://srackham.wordpress.com/blogpost1/[blogpost.py man
+See also the http://srackham.wordpress.com/blogpost1/[blogpost(1) man
 page].
+
+'blogpost' uses Michele Ferretti’s
+http://www.blackbirdblog.it/programmazione/progetti/28[Python
+Wordpress library] and comes with a patched version of the
+`wordpreslib.py` library module (the patch added WordPress 'Page'
+XML-RPC methods).
 
 
 Prerequisites
 -------------
-- http://www.methods.co.nz/asciidoc/[AsciiDoc].
-- Michele Ferretti’s
-  http://www.blackbirdblog.it/programmazione/progetti/28[Python
-  Wordpress library]. To download and install unpack the
-  `wordpress.zip` file and then install it:
-
-  $ sudo python setup.py install
+- Python 2.5 or better (has not been tried with earlier versions).
+- http://www.methods.co.nz/asciidoc/[AsciiDoc] (unless you only plan
+  to source raw HTML documents).
 
 
 Installation

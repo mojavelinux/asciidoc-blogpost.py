@@ -167,7 +167,7 @@ class Media(object):
         """
         checksum = md5.new(open(self.filename).read()).hexdigest()
         if self.checksum is not None and self.checksum == checksum:
-            verbose('media unchanged: %s' % self.filename)
+            infomsg('skipping: %s' % self.filename)
         else:
             infomsg('uploading: %s...' % self.filename)
             if not blog.options.dry_run:
@@ -222,7 +222,8 @@ class Blogpost(object):
     def set_blog_file(self, blog_file):
         if blog_file is not None:
             self.blog_file = blog_file
-            self.media_dir = os.path.abspath(os.path.dirname(blog_file))
+            if self.media_dir is None:
+                self.media_dir = os.path.abspath(os.path.dirname(blog_file))
             self.cache_file = os.path.splitext(blog_file)[0] + '.blogpost'
 
     def set_title_from_blog_file(self):
@@ -341,7 +342,13 @@ class Blogpost(object):
         self.cache_file is None then caching is not used and no cache file
         written.
         """
-        media_exts = ('gif','jpg','png','mp3','bmp','ogg')
+        # All these extensions may not be supported by your WordPress server,
+        # Check with your hoster if you get an 'Invalid file type' error.
+        media_exts = (
+            'gif','jpg','jpeg','png',
+            'pdf','doc','odt',
+            'mp3','ogg','wav','m4a','mov','wmv','avi','mpg',
+        )
         result = StringIO.StringIO()
         rexp = re.compile(r'<(?P<tag>(a href)|(img src))="(?P<src>.+?)"')
         for line in self.content:
@@ -355,6 +362,7 @@ class Blogpost(object):
                     if not os.path.isfile(media_file):
                         if media_obj:
                             url =  media_obj.url
+                            infomsg('missing media file: %s' % media_file)
                         else:
                             url = src
                     else:
@@ -551,6 +559,9 @@ else:
     parser.add_option('-M', '--no-media',
         action='store_false', dest='media', default=True,
         help='do not process document media objects')
+    parser.add_option('--media-dir',
+        dest='media_dir', default=None, metavar='MEDIA_DIR',
+        help='set location of media files')
     parser.add_option('--post-id', type='int',
         dest='post_id', default=None, metavar='POST_ID',
         help='blog post ID number')
@@ -616,6 +627,10 @@ else:
     # Do the work.
     try:
         blog = Blogpost(URL, USERNAME, PASSWORD, OPTIONS)
+        if OPTIONS.media_dir is not None:
+            if not os.path.isdir(OPTIONS.media_dir):
+                die('missing media directory: %s' % OPTIONS.media_dir)
+            blog.media_dir = OPTIONS.media_dir
         blog.set_blog_file(blog_file)
         blog.load_cache()
         if OPTIONS.title is not None:

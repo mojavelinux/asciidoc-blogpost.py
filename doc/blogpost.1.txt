@@ -5,7 +5,7 @@ Stuart Rackham
 
 NAME
 ----
-blogpost - WordPress weblog client for AsciiDoc
+blogpost - WordPress weblog client
 
 
 SYNOPSIS
@@ -15,10 +15,9 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-A WordPress command-line weblog client for AsciiDoc. It creates and
-updates weblog entries directly from AsciiDoc (or HTML) source
-documents. You can also delete and list weblog entries from the
-command-line.
+A WordPress command-line weblog. It creates and updates weblog entries
+directly from AsciiDoc (or HTML) source documents. You can also delete
+and list weblog entries from the command-line.
 
 - Manages WordPress Posts and Pages.
 - Automatically uploads media files (images, video, audio).

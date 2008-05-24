@@ -132,28 +132,28 @@ class WordPressClient:
 		"""Transform post struct in WordPressPost instance 
 		"""
 		postObj = WordPressPost()
-		postObj.permaLink 		= post['permaLink']
-		postObj.description 	= post['description']
-		postObj.title 			= post['title']
-		postObj.excerpt 		= post['mt_excerpt']
-		postObj.user 			= post['userid']
-		postObj.date 			= time.strptime(str(post['dateCreated']), "%Y%m%dT%H:%M:%S")
-		postObj.link 			= post['link']
-		postObj.textMore 		= post['mt_text_more']
-		postObj.allowComments 	= post['mt_allow_comments'] == 1
-		postObj.id 				= int(post['postid'])
-		postObj.categories 		= post['categories']
-		postObj.allowPings 		= post['mt_allow_pings'] == 1
+		postObj.permaLink		= post['permaLink']
+		postObj.description		= post['description']
+		postObj.title			= post['title']
+		postObj.excerpt			= post['mt_excerpt']
+		postObj.user			= post['userid']
+		postObj.date			= time.strptime(str(post['dateCreated']), "%Y%m%dT%H:%M:%S")
+		postObj.link			= post['link']
+		postObj.textMore		= post['mt_text_more']
+		postObj.allowComments	= post['mt_allow_comments'] == 1
+		postObj.id				= int(post['postid'])
+		postObj.categories		= post['categories']
+		postObj.allowPings		= post['mt_allow_pings'] == 1
 		return postObj
 		
 	def _filterCategory(self, cat):
 		"""Transform category struct in WordPressCategory instance
 		"""
 		catObj = WordPressCategory()
-		catObj.id 			= int(cat['categoryId'])
-		catObj.name 		= cat['categoryName'] 
+		catObj.id			= int(cat['categoryId'])
+		catObj.name			= cat['categoryName'] 
 		if cat.has_key('isPrimary'):
-			catObj.isPrimary 	= cat['isPrimary']
+			catObj.isPrimary	= cat['isPrimary']
 		return catObj
 		
 	def selectBlog(self, blogId):
@@ -377,26 +377,26 @@ class WordPressClient:
 		except xmlrpclib.Fault, fault:
 			raise WordPressException(fault)
 	
-    ##############
-    # Page methods added by Stuart Rackham <srackham@gmail.com>, May 2008.
-    #
-    # NOTES:
-    # - Page API docs at http://www.sixapart.com/developers/xmlrpc/pages_api/
-    # - publishPost, getPost, editPost, deletePost XML-RPC calls  seem to
-    #   work on Pages but the code here makes no use of this undocument
-    #   property.
-    # - getPages does not return unpublished pages.
-    ##############
+	##############
+	# Page methods added by Stuart Rackham <srackham@gmail.com>, May 2008.
+	#
+	# NOTES:
+	# - Page API docs at http://www.sixapart.com/developers/xmlrpc/pages_api/
+	# - publishPost, getPost, editPost, deletePost XML-RPC calls  seem to
+	#	work on Pages but the code here makes no use of this undocument
+	#	property.
+	# - getPages does not return unpublished pages.
+	##############
 
 	def _filterPage(self, post):
 		"""Transform post struct in WordPressPost instance 
 		"""
 		postObj = WordPressPost()
-		postObj.date 			= time.strptime(str(post['dateCreated']), "%Y%m%dT%H:%M:%S")
-		postObj.permaLink 		= post['permaLink']
-		postObj.id 				= int(post['page_id'])
-		postObj.description 	= post['description']
-		postObj.title 			= post['title']
+		postObj.date			= time.strptime(str(post['dateCreated']), "%Y%m%dT%H:%M:%S")
+		postObj.permaLink		= post['permaLink']
+		postObj.id				= int(post['page_id'])
+		postObj.description		= post['description']
+		postObj.title			= post['title']
 		return postObj
 		
 	def getLastPage(self):
@@ -464,6 +464,18 @@ class WordPressClient:
 		except xmlrpclib.Fault, fault:
 			raise WordPressException(fault)
 
-    #####################
-    # End of Page methods
-    #####################
+	def newCategory(self, name, description=None):
+		"""Create new category. Return new categoryId.
+		"""
+		cat = {'name': name}
+		if description is not None:
+			cat['description'] = description
+		try:
+			return self._server.wp.newCategory(self.blogId, self.user,
+					self.password, cat)
+		except xmlrpclib.Fault, fault:
+			raise WordPressException(fault)
+
+	#####################
+	# End of Page methods
+	#####################

@@ -29,6 +29,11 @@ COMMANDS
 *c, create*::
   Create a new weblog post using the contents of the 'BLOG_FILE'.
 
+*cat, categories*::
+  If 'BLOG_FILE' is not specified then list all weblog categories.
+  Specify both the 'BLOG_FILE' and the '--categories' option to set
+  the Post categories.
+
 *d, delete*::
   Delete weblog post. Deletes the 'BLOG_FILE' blogpost cache
   file but not the 'BLOG_FILE'.
@@ -105,6 +110,14 @@ OPTIONS
   AsciiDoc doctype values because AsciiDoc generates WordPress
   friendly HTML.
   Applicable to 'create' and 'update' commands.
+
+*-c, --categories*='CATEGORIES'::
+  A comma separated list of categories that will be assigned to the
+  weblog post. Prefixing 'CATEGORIES' with a plus or minus character
+  adds or removes the categories from an existing post. Category names
+  are case insensitive. If an assigned category does not already exist
+  it will be created.
+  Applicable to 'categories' command.
 
 *-n, --dry-run*::
   Simulate command execution without doing anything, instead report

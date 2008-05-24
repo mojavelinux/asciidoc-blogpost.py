@@ -522,6 +522,82 @@ class Blogpost(object):
         self.updated_at = int(time.time())
         self.save_cache()
 
+    def list_categories(self):
+        """
+        Print alphabetized list of weblog categories.
+        """
+        categories = self.server.getCategoryList()
+        categories = sorted(categories,
+            lambda x,y: cmp(x.name.lower(), y.name.lower()))
+        for cat in categories:
+            print '%s (%s)' % (cat.name, cat.id)
+
+    def set_categories(self):
+        """
+        Set weblog post categories based on --categories option value.
+        """
+        def get_cat(name, categories):
+            """
+            Return first category with matching name (case insensitive).
+            Return None if not found.
+            """
+            for cat in categories:
+                if name.lower() == cat.name.lower():
+                    return cat
+
+        def del_cat(id, categories):
+            """
+            Delete category with id from categories list.
+            """
+            for i,cat in enumerate(categories):
+                if cat.id == id:
+                    del categories[i]
+
+        def new_cat(name):
+            """
+            Add a new weblog category.
+            """
+            infomsg('creating new category: %s...' % name)
+            cat = wordpresslib.WordPressCategory()
+            cat.name = name
+            if not self.options.dry_run:
+                cat.id = self.server.newCategory(name)
+            return cat
+
+        all_cats = self.server.getCategoryList()
+        post_cats = list(self.server.getPostCategories(self.id))
+        opt_cats = OPTIONS.categories.strip()
+        if opt_cats:
+            minus = opt_cats.startswith('-')
+            plus = opt_cats.startswith('+')
+            if opt_cats[0] in '+-':
+                opt_cats = opt_cats[1:]
+            opt_cats = [s.strip() for s in opt_cats.split(',')]
+            if minus:
+                for name in opt_cats:
+                    cat = get_cat(name, all_cats)
+                    if not cat:
+                        die('no such category: %s' % name)
+                    del_cat(cat.id, post_cats)
+            elif plus:
+                for name in opt_cats:
+                    cat = get_cat(name, all_cats)
+                    if not cat:
+                        cat = new_cat(name)
+                    if not get_cat(name, post_cats):
+                        post_cats.append(cat)
+            else:
+                post_cats = []
+                for name in opt_cats:
+                    cat = get_cat(name, all_cats)
+                    if not cat:
+                        cat = new_cat(name)
+                    post_cats.append(cat)
+            infomsg('assigning categories: %s' %
+                    ','.join([cat.name for cat in post_cats]))
+            if not self.options.dry_run:
+                wp_cats = [{'categoryId': cat.id} for cat in post_cats]
+                self.server.setPostCategories(self.id, wp_cats)
 
 if __name__ != '__main__':
     # So we can import and use as a library.
@@ -529,10 +605,11 @@ if __name__ != '__main__':
                 dry_run = False,
                 verbose = False,
                 media = True,
+                categories = ''
             )
 else:
-    long_commands = ('create','delete','info','list','reset','update')
-    short_commands = {'c':'create', 'd':'delete', 'i':'info', 'l':'list', 'r':'reset', 'u':'update'}
+    long_commands = ('create','categories','delete','info','list','reset','update')
+    short_commands = {'c':'create', 'cat':'categories', 'd':'delete', 'i':'info', 'l':'list', 'r':'reset', 'u':'update'}
     description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: %s. BLOG_FILE is AsciiDoc (or optionally HTML) text file. POST_ID is optional weblog post ID number.""" % ', '.join(long_commands)
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [BLOG_FILE]',
@@ -567,6 +644,9 @@ else:
     parser.add_option('--post-id', type='int',
         dest='post_id', default=None, metavar='POST_ID',
         help='blog post ID number')
+    parser.add_option('-c', '--categories',
+        dest='categories', default='', metavar='CATEGORIES',
+        help='comma separated list of post categories')
     parser.add_option('-n', '--dry-run',
         action='store_true', dest='dry_run', default=False,
         help='show what would have been done')
@@ -587,10 +667,10 @@ else:
     if command not in long_commands:
         parser.error('invalid command: %s' % command)
     blog_file = None
-    if len(args) == 1 and command in ('delete','list'):
+    if len(args) == 1 and command in ('categories','delete','list'):
         # No command arguments.
         pass
-    elif len(args) == 2 and command in ('create','delete','info','reset','update'):
+    elif len(args) == 2 and command in ('create','categories','delete','info','reset','update'):
         # Single command argument BLOG_FILE
         blog_file = args[1]
     else:
@@ -601,6 +681,9 @@ else:
         blog_file = os.path.abspath(blog_file)
     if OPTIONS.doctype not in (None, 'article','book','manpage','html'):
         parser.error('invalid DOCTYPE: %s' % OPTIONS.doctype)
+    if OPTIONS.categories and \
+            (command != 'categories' or not (blog_file or OPTIONS.post_id)):
+        parser.error('--categories is inappropriate')
     # --post-id option checks.
     if command not in ('delete','update') and OPTIONS.post_id is not None:
         parser.error('--post-id is incompatible with %s command' % command)
@@ -663,6 +746,11 @@ else:
             if not os.path.isfile(blog.cache_file):
                 die('missing cache file: %s' % blog.cache_file)
             blog.info()
+        elif command == 'categories':
+            if OPTIONS.categories:
+                blog.set_categories()
+            else:
+                blog.list_categories()
         elif command == 'list':
             blog.list()
         elif command == 'delete':

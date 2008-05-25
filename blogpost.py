@@ -635,9 +635,9 @@ if __name__ != '__main__':
                 categories = ''
             )
 else:
-    long_commands = ('create','categories','delete','info','list','reset','update')
-    short_commands = {'c':'create', 'cat':'categories', 'd':'delete', 'i':'info', 'l':'list', 'r':'reset', 'u':'update'}
-    description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: %s. BLOG_FILE is AsciiDoc (or optionally HTML) text file. POST_ID is optional weblog post ID number.""" % ', '.join(long_commands)
+    long_commands = ('create','categories','delete','info','list','update')
+    short_commands = {'c':'create', 'cat':'categories', 'd':'delete', 'i':'info', 'l':'list', 'u':'update'}
+    description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: %s. BLOG_FILE is AsciiDoc (or optionally HTML) text file.""" % ', '.join(long_commands)
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [BLOG_FILE]',
         version='%prog ' + VERSION,
@@ -700,7 +700,7 @@ else:
     if len(args) == 1 and command in ('categories','delete','list'):
         # No command arguments.
         pass
-    elif len(args) == 2 and command in ('create','categories','delete','info','reset','update'):
+    elif len(args) == 2 and command in ('create','categories','delete','info','update'):
         # Single command argument BLOG_FILE
         blog_file = args[1]
     else:
@@ -768,10 +768,6 @@ else:
             blog.doctype = OPTIONS.doctype
         if blog.doctype is None:
             blog.doctype = 'article'    # Default if not in cache.
-        if command == 'reset':
-            if not os.path.isfile(blog.cache_file):
-                die('missing cache file: %s' % blog.cache_file)
-            blog.delete_cache()
         elif command == 'info':
             if not os.path.isfile(blog.cache_file):
                 die('missing cache file: %s' % blog.cache_file)
@@ -789,8 +785,7 @@ else:
             blog.delete()
         elif command == 'create':
             if blog.id is not None:
-                die('''document has been previously posted:
-       use update command (or reset command followed by create command)''')
+                die('document has been previously posted, use update command')
             blog.create()
         elif command == 'update':
             if blog.id is None:

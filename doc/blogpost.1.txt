@@ -48,12 +48,6 @@ COMMANDS
   List recent weblog Posts. Information is sourced directly from
   WordPress server. Use the '--pages' option to list published Pages.
 
-*r, reset*::
-  Delete the 'BLOG_FILE' blogpost cache file.  Executing this command
-  will force the next update to upload all media irrespective of
-  whether or not they were previously uploaded.  You won't normally
-  need to use this command.
-
 *u, update*::
   Update existing weblog post with the contents of the 'BLOG_FILE'.
 

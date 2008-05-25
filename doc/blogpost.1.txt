@@ -21,7 +21,8 @@ and list weblog entries from the command-line.
 
 - Manages WordPress Posts and Pages.
 - Automatically uploads media files (images, video, audio).
-- Only posts new or modified media files.
+- Only posts new or modified content and media files.
+- Manages WordPress weblog categories.
 
 
 COMMANDS
@@ -32,7 +33,7 @@ COMMANDS
 *cat, categories*::
   If 'BLOG_FILE' is not specified then list all weblog categories.
   Specify the 'BLOG_FILE' (or '--post-id') and the '--categories'
-  option to set the Post categories. This command does not use the
+  option to set the Post categories. This command does not require a
   client-side 'BLOG_FILE' blogpost cache file.
 
 *d, delete*::
@@ -121,7 +122,7 @@ OPTIONS
   Applicable to 'categories' command.
 
 *--force*::
-  Force blog file and media files upload even if they have not been
+  Force blog file and media files to upload even if they have not been
   modified since the last update command.
 
 *-n, --dry-run*::

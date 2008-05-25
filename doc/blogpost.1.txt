@@ -31,8 +31,9 @@ COMMANDS
 
 *cat, categories*::
   If 'BLOG_FILE' is not specified then list all weblog categories.
-  Specify both the 'BLOG_FILE' and the '--categories' option to set
-  the Post categories.
+  Specify the 'BLOG_FILE' (or '--post-id') and the '--categories'
+  option to set the Post categories. This command does not use the
+  client-side 'BLOG_FILE' blogpost cache file.
 
 *d, delete*::
   Delete weblog post. Deletes the 'BLOG_FILE' blogpost cache

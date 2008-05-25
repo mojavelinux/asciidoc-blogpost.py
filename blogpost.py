@@ -8,7 +8,7 @@ Email:     srackham@methods.co.nz
 
 """
 
-VERSION = '0.9.0'
+VERSION = '0.9.1'
 
 import sys
 import os
@@ -54,6 +54,12 @@ class Namespace(object):
     """
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
+
+    # This is here so unpickling <0.9.1 cache files still works.
+    def __setstate__(self, state):
+        self.categories = []        # Attribute added at version 0.9.1
+        self.__dict__.update(state)
+        self.__class__ = Cache      # Cache class name change in 0.9.1
 
 def errmsg(msg):
     sys.stderr.write('%s\n' % msg)
@@ -178,6 +184,13 @@ class Media(object):
             self.checksum = checksum
 
 
+class Cache(Namespace):
+    """
+    Structure for pickled blogpost cache file data.
+    """
+    pass
+
+
 class Blogpost(object):
 
     def __init__(self, server_url, username, password, options):
@@ -193,6 +206,7 @@ class Blogpost(object):
         self.created_at = None  # Seconds since epoch in UTC.
         self.updated_at = None  # Seconds since epoch in UTC.
         self.media = {}  # Contains Media objects keyed by document src path.
+        self.categories = []    # List of category names.
         # Client-side blog data.
         self.blog_file = None
         self.checksum = None    # self.blog_file MD5 checksum.
@@ -291,6 +305,7 @@ class Blogpost(object):
             self.updated_at = cache.updated_at
             self.media = cache.media
             self.checksum = cache.checksum
+            self.categories = cache.categories
 
     def save_cache(self):
         """
@@ -299,7 +314,7 @@ class Blogpost(object):
         if self.cache_file is not None:
             verbose('writing cache: %s' % self.cache_file)
             if not self.options.dry_run:
-                cache = Namespace(
+                cache = Cache(
                         url = self.url,
                         id = self.id,
                         title = self.title,
@@ -310,6 +325,7 @@ class Blogpost(object):
                         updated_at = self.updated_at,
                         media = self.media,
                         checksum = self.checksum,
+                        categories = self.categories,
                     )
                 f = open(self.cache_file, 'w')
                 try:
@@ -392,6 +408,7 @@ class Blogpost(object):
                 post = self.server.getPost(self.id)
         self.id = post.id
         self.url = post.permaLink
+        self.categories = post.categories
         # UTC struct_time to UTC timestamp.
         if not self.options.dry_run:
             self.created_at = calendar.timegm(post.date)
@@ -403,18 +420,20 @@ class Blogpost(object):
         """
         Print post cache information.
         """
-        print 'title:   %s' % self.title
-        print 'id:      %s' % self.id
-        print 'url:     %s' % self.url
-        print 'status:  %s' % self.status
-        print 'type:    %s' % self.post_type
-        print 'doctype: %s' % self.doctype
-        print 'created: %s' % time.strftime('%c',
+        print 'title:      %s' % self.title
+        print 'id:         %s' % self.id
+        print 'url:        %s' % self.url
+        if not self.is_page():
+            print 'categories: %s' % ','.join(self.categories)
+        print 'status:     %s' % self.status
+        print 'type:       %s' % self.post_type
+        print 'doctype:    %s' % self.doctype
+        print 'created:    %s' % time.strftime('%c',
                 time.localtime(self.created_at))
-        print 'updated: %s' % time.strftime('%c',
+        print 'updated:    %s' % time.strftime('%c',
                 time.localtime(self.updated_at))
         for media_obj in self.media.values():
-            print 'media:   %s' % media_obj.url
+            print 'media:      %s' % media_obj.url
 
     def list(self):
         """
@@ -427,11 +446,11 @@ class Blogpost(object):
             posts = self.server.getRecentPosts(20)
         for post in posts:
             print 'title:      %s' % post.title
+            print 'id:         %s' % post.id
+            print 'url:        %s' % post.permaLink
+            print 'type:       %s' % self.post_type
             if not self.is_page():
                 print 'categories: %s' % ','.join(post.categories)
-            print 'id:         %s' % post.id
-            print 'type:       %s' % self.post_type
-            print 'url:        %s' % post.permaLink
             # Convert UTC to local time.
             print 'created:    %s' % \
                 time.strftime('%c', time.localtime(calendar.timegm(post.date)))
@@ -593,11 +612,13 @@ class Blogpost(object):
                     if not cat:
                         cat = new_cat(name)
                     post_cats.append(cat)
-            infomsg('assigning categories: %s' %
-                    ','.join([cat.name for cat in post_cats]))
+            cat_names = [cat.name for cat in post_cats]
+            infomsg('assigning categories: %s' % ','.join(cat_names))
             if not self.options.dry_run:
                 wp_cats = [{'categoryId': cat.id} for cat in post_cats]
                 self.server.setPostCategories(self.id, wp_cats)
+            self.categories = cat_names
+            self.save_cache()
 
 if __name__ != '__main__':
     # So we can import and use as a library.

@@ -378,7 +378,8 @@ class WordPressClient:
 			raise WordPressException(fault)
 	
 	##############
-	# Page methods added by Stuart Rackham <srackham@gmail.com>, May 2008.
+	# Patch added by Stuart Rackham <srackham@gmail.com>, May 2008.
+    # Page methods and newCategory method.
 	#
 	# NOTES:
 	# - Page API docs at http://www.sixapart.com/developers/xmlrpc/pages_api/
@@ -386,6 +387,10 @@ class WordPressClient:
 	#	work on Pages but the code here makes no use of this undocument
 	#	property.
 	# - getPages does not return unpublished pages.
+	##############
+
+	##############
+	# Page methods
 	##############
 
 	def _filterPage(self, post):
@@ -464,6 +469,10 @@ class WordPressClient:
 		except xmlrpclib.Fault, fault:
 			raise WordPressException(fault)
 
+	#####################
+	# Additional methods
+	#####################
+
 	def newCategory(self, name, description=None):
 		"""Create new category. Return new categoryId.
 		"""
@@ -477,5 +486,5 @@ class WordPressClient:
 			raise WordPressException(fault)
 
 	#####################
-	# End of Page methods
+	# End of Patch
 	#####################

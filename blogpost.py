@@ -173,7 +173,7 @@ class Media(object):
         """
         checksum = md5.new(open(self.filename).read()).hexdigest()
         if self.checksum is not None and self.checksum == checksum:
-            infomsg('skipping: %s' % self.filename)
+            infomsg('skipping unmodified: %s' % self.filename)
         else:
             infomsg('uploading: %s...' % self.filename)
             if not blog.options.dry_run:
@@ -387,6 +387,7 @@ class Blogpost(object):
                             self.media[src] = media_obj
                         media_obj.upload(self)
                         url =  media_obj.url
+                        self.updated_at = int(time.time())
                     line = rexp.sub('<%s="%s"' % (tag, url), line)
             result.write(line)
         result.seek(0)
@@ -486,11 +487,6 @@ class Blogpost(object):
         The blog_file can be either an AsciiDoc file or an
         HTML file (self.doctype == True).
         """
-        # Only update if blog file has changed.
-        checksum = md5.new(open(self.blog_file).read()).hexdigest()
-        if self.checksum is not None and self.checksum == checksum:
-            verbose('blog file unchanged: %s' % self.blog_file)
-        self.checksum = checksum
         # Create wordpresslib.WordPressPost object.
         if self.id is not None:
             post = self.get_post()
@@ -520,25 +516,31 @@ class Blogpost(object):
             # This can be a lot of output so only show if the user asks.
             infomsg(post.description)
         # Create/update post.
-        action = 'updating' if self.id else 'creating'
-        infomsg("%s %s %s '%s'..." % \
-                (action, self.status, self.post_type, self.title))
-        if not self.options.dry_run:
-            if self.id is None:
-                if self.is_page():
-                    self.id = self.server.newPage(post, self.is_published())
+        # Only update if blog file has changed.
+        checksum = md5.new(open(self.blog_file).read()).hexdigest()
+        if self.checksum is not None and self.checksum == checksum:
+            infomsg('skipping unmodified: %s' % self.blog_file)
+        else:
+            self.checksum = checksum
+            action = 'updating' if self.id else 'creating'
+            infomsg("%s %s %s '%s'..." % \
+                    (action, self.status, self.post_type, self.title))
+            if not self.options.dry_run:
+                if self.id is None:
+                    if self.is_page():
+                        self.id = self.server.newPage(post, self.is_published())
+                    else:
+                        self.id = self.server.newPost(post, self.is_published())
                 else:
-                    self.id = self.server.newPost(post, self.is_published())
-            else:
-                if self.is_page():
-                    self.server.editPage(self.id, post, self.is_published())
-                else:
-                    self.server.editPost(self.id, post, self.is_published())
-        print 'id: %s' % self.id
-        # Get post so we can find what it's url and creation date is.
-        post = self.get_post()
-        print 'url: %s' % post.permaLink
-        self.updated_at = int(time.time())
+                    if self.is_page():
+                        self.server.editPage(self.id, post, self.is_published())
+                    else:
+                        self.server.editPost(self.id, post, self.is_published())
+            print 'id: %s' % self.id
+            # Get post so we can find what it's url and creation date is.
+            post = self.get_post()
+            print 'url: %s' % post.permaLink
+            self.updated_at = int(time.time())
         self.save_cache()
 
     def list_categories(self):

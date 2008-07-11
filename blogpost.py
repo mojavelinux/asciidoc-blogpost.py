@@ -768,7 +768,9 @@ else:
             blog.doctype = OPTIONS.doctype
         if blog.doctype is None:
             blog.doctype = 'article'    # Default if not in cache.
-        elif command == 'info':
+
+        # Handle commands.
+        if command == 'info':
             if not os.path.isfile(blog.cache_file):
                 die('missing cache file: %s' % blog.cache_file)
             blog.info()

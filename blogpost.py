@@ -8,7 +8,7 @@ Email:     srackham@methods.co.nz
 
 """
 
-VERSION = '0.9.1'
+VERSION = '0.9.2'
 
 import sys
 import os
@@ -484,6 +484,11 @@ class Blogpost(object):
         assert(self.id is not None)
         self.post()
 
+    def output(self):
+        self.asciidoc2html()
+        self.sanitize_html()
+        print self.content.read()
+
     def post(self):
         """
         Update an existing Wordpress post if post_id is not None,
@@ -637,8 +642,8 @@ if __name__ != '__main__':
                 categories = ''
             )
 else:
-    long_commands = ('create','categories','delete','info','list','update')
-    short_commands = {'c':'create', 'cat':'categories', 'd':'delete', 'i':'info', 'l':'list', 'u':'update'}
+    long_commands = ('create','categories','delete','info','list','update','output')
+    short_commands = {'c':'create', 'cat':'categories', 'd':'delete', 'i':'info', 'l':'list', 'u':'update', 'o':'output'}
     description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: %s. BLOG_FILE is AsciiDoc (or optionally HTML) text file.""" % ', '.join(long_commands)
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [BLOG_FILE]',
@@ -702,7 +707,7 @@ else:
     if len(args) == 1 and command in ('categories','delete','list'):
         # No command arguments.
         pass
-    elif len(args) == 2 and command in ('create','categories','delete','info','update'):
+    elif len(args) == 2 and command in ('create','categories','delete','info','update','output'):
         # Single command argument BLOG_FILE
         blog_file = args[1]
     else:
@@ -795,6 +800,8 @@ else:
             if blog.id is None:
                 die('missing cache file: specify --post-id instead')
             blog.update()
+        elif command == 'output':
+            blog.output()
         else:
             assert(False)
     except (wordpresslib.WordPressException, xmlrpclib.ProtocolError), e:

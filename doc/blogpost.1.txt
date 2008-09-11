@@ -48,6 +48,9 @@ COMMANDS
   List recent weblog Posts. Information is sourced directly from
   WordPress server. Use the '--pages' option to list published Pages.
 
+*o, output*::
+  Convert the AsciiDoc 'BLOG_FILE' to HTML and print on 'stdout'.
+
 *u, update*::
   Update existing weblog post with the contents of the 'BLOG_FILE'.
 

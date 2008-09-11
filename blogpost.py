@@ -271,7 +271,9 @@ class Blogpost(object):
                 self.blog_file,
             ],
             is_verbose=self.options.verbose)
-        self.content = StringIO.StringIO(result)
+#        self.content = StringIO.StringIO(result)
+        result = unicode(result,'utf8')
+        self.content = StringIO.StringIO(result.encode('utf8'))
 
     def sanitize_html(self):
         """

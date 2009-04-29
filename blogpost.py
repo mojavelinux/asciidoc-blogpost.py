@@ -8,7 +8,7 @@ Email:     srackham@methods.co.nz
 
 """
 
-VERSION = '0.9.2'
+VERSION = '0.9.3'
 
 import sys
 import os
@@ -23,6 +23,7 @@ import md5
 import calendar
 
 import wordpresslib # http://www.blackbirdblog.it/programmazione/progetti/28
+import asciidocapi
 
 
 ######################################################################
@@ -36,7 +37,6 @@ import wordpresslib # http://www.blackbirdblog.it/programmazione/progetti/28
 URL = None      # Wordpress XML-RPC URL (don't forget to append /xmlrpc.php)
 USERNAME = None # Wordpress login name.
 PASSWORD = None # Wordpress password.
-ASCIIDOC = ['asciidoc'] # Arguments to start asciidoc.
 
 
 ######################################################################
@@ -261,17 +261,12 @@ class Blogpost(object):
         """
         Convert AsciiDoc blog_file to Wordpress compatible HTML content.
         """
-        result = exec_args(
-            ASCIIDOC +
-            [
-                '--no-header-footer',
-                '--doctype', self.doctype,
-                '--backend', 'wordpress',
-                '--out-file', '-',
-                self.blog_file,
-            ],
-            is_verbose=self.options.verbose)
-#        self.content = StringIO.StringIO(result)
+        asciidoc = asciidocapi.AsciiDocAPI()
+        asciidoc.options('--no-header-footer')
+        asciidoc.options('--doctype', self.doctype)
+        outfile = StringIO.StringIO()
+        asciidoc.execute(self.blog_file, outfile, backend='wordpress')
+        result = outfile.getvalue()
         result = unicode(result,'utf8')
         self.content = StringIO.StringIO(result.encode('utf8'))
 
@@ -584,6 +579,7 @@ class Blogpost(object):
             for i,cat in enumerate(categories):
                 if cat.id == id:
                     del categories[i]
+                    break
 
         def new_cat(name):
             """
@@ -804,7 +800,8 @@ else:
             blog.output()
         else:
             assert(False)
-    except (wordpresslib.WordPressException, xmlrpclib.ProtocolError), e:
+    except (wordpresslib.WordPressException, xmlrpclib.ProtocolError,
+            asciidocapi.AsciiDocAPI), e:
         msg = e.message
         if not msg:
             # xmlrpclib.ProtocolError does not set message attribute.

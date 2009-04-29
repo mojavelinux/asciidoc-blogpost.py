@@ -31,10 +31,9 @@ COMMANDS
   Create a new weblog post using the contents of the 'BLOG_FILE'.
 
 *cat, categories*::
-  If 'BLOG_FILE' is not specified then list all weblog categories.
-  Specify the 'BLOG_FILE' (or '--post-id') and the '--categories'
-  option to set the Post categories. This command does not require a
-  client-side 'BLOG_FILE' blogpost cache file.
+  Specify the '--categories' option and either a 'BLOG_FILE' or a
+  '--post-id' to set the Post categories.  If the '--categories'
+  option is not specified then all weblog categories are listed.
 
 *d, delete*::
   Delete weblog post. Deletes the 'BLOG_FILE' blogpost cache

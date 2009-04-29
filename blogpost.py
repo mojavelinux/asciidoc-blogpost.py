@@ -718,7 +718,7 @@ else:
             (command != 'categories' or not (blog_file or OPTIONS.post_id)):
         parser.error('--categories is inappropriate')
     # --post-id option checks.
-    if command not in ('delete','update') and OPTIONS.post_id is not None:
+    if command not in ('delete','update','categories') and OPTIONS.post_id is not None:
         parser.error('--post-id is incompatible with %s command' % command)
     if command == 'delete':
         if blog_file is None and OPTIONS.post_id is None:

@@ -638,8 +638,8 @@ if __name__ != '__main__':
                 categories = ''
             )
 else:
-    long_commands = ('create','categories','delete','info','list','update','output')
-    short_commands = {'c':'create', 'cat':'categories', 'd':'delete', 'i':'info', 'l':'list', 'u':'update', 'o':'output'}
+    long_commands = ('create','categories','delete','info','list','post','update')
+    short_commands = {'c':'create', 'cat':'categories', 'd':'delete', 'i':'info', 'l':'list', 'p':'post', 'u':'update'}
     description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: %s. BLOG_FILE is AsciiDoc (or optionally HTML) text file.""" % ', '.join(long_commands)
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [BLOG_FILE]',
@@ -703,7 +703,7 @@ else:
     if len(args) == 1 and command in ('categories','delete','list'):
         # No command arguments.
         pass
-    elif len(args) == 2 and command in ('create','categories','delete','info','update','output'):
+    elif len(args) == 2 and command in ('create','categories','delete','info','update','post'):
         # Single command argument BLOG_FILE
         blog_file = args[1]
     else:
@@ -712,13 +712,14 @@ else:
         if not os.path.isfile(blog_file):
             die('missing BLOG_FILE: %s' % blog_file)
         blog_file = os.path.abspath(blog_file)
-    if OPTIONS.doctype not in (None, 'article','book','manpage','html'):
+    if OPTIONS.doctype not in (None, 'article', 'book', 'manpage', 'html'):
         parser.error('invalid DOCTYPE: %s' % OPTIONS.doctype)
     if OPTIONS.categories and \
-            (command != 'categories' or not (blog_file or OPTIONS.post_id)):
+            (command not in ('create','update','categories','post')
+             or (not blog_file or OPTIONS.post_id)):
         parser.error('--categories is inappropriate')
     # --post-id option checks.
-    if command not in ('delete','update','categories') and OPTIONS.post_id is not None:
+    if command not in ('delete','update','categories','post') and OPTIONS.post_id is not None:
         parser.error('--post-id is incompatible with %s command' % command)
     if command == 'delete':
         if blog_file is None and OPTIONS.post_id is None:
@@ -788,16 +789,19 @@ else:
             if blog.id is None:
                 die('missing cache file: specify --post-id instead')
             blog.delete()
-        elif command == 'create':
-            if blog.id is not None:
+        elif command in ('post','create','update'):
+            if blog.id is not None and command == 'create':
                 die('document has been previously posted, use update command')
-            blog.create()
-        elif command == 'update':
-            if blog.id is None:
+            if blog.id is None and command == 'update':
                 die('missing cache file: specify --post-id instead')
-            blog.update()
-        elif command == 'output':
-            blog.output()
+            if command == 'update' or \
+                    command == 'post' and blog.id is not None:
+                blog.update()
+            if command == 'create' or \
+                    command == 'post' and blog.id is None:
+                blog.create()
+            if OPTIONS.categories:
+                blog.set_categories()
         else:
             assert(False)
     except (wordpresslib.WordPressException, xmlrpclib.ProtocolError,

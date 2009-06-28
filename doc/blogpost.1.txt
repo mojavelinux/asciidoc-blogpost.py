@@ -47,6 +47,10 @@ COMMANDS
   List recent weblog Posts. Information is sourced directly from
   WordPress server. Use the '--pages' option to list published Pages.
 
+*p, post*::
+  Post the weblog post. This is the same as the 'create' command if a
+  new post, or the 'update' command if previously posted.
+
 *o, output*::
   Convert the AsciiDoc 'BLOG_FILE' to HTML and print on 'stdout'.
 
@@ -68,11 +72,11 @@ OPTIONS
 
 *-u, --unpublish*::
   Set weblog post status to 'unpublished'.
-  Applicable to 'create' and 'update' commands.
+  Applicable to 'create', 'update' or 'post' commands.
 
 *-U, --publish*::
   Set weblog post status to 'published'.
-  Applicable to 'create' and 'update' commands.
+  Applicable to 'create', 'update' or 'post' commands.
 
 *--post-id*='POST_ID'::
   Explicitly specify the weblog post ID number. This option will only
@@ -81,11 +85,11 @@ OPTIONS
 
 *-p, --pages*::
   Apply 'COMMAND' to weblog 'Pages' rather than normal weblog 'Posts'.
-  Applicable to 'create', 'delete', 'list' and 'update' commands.
+  Applicable to 'create', 'delete', 'list', 'post' and 'update' commands.
 
 *-M, --no-media*::
   Do not upload media files.
-  Applicable to 'create' and 'update' commands.
+  Applicable to 'create', 'update' or 'post' commands.
 
 *--media-dir=MEDIA_DIR*::
   The name of the directory containing those media files that have
@@ -97,7 +101,7 @@ OPTIONS
   Set the weblog post title If this option is omitted and there is no
   cache file and the 'BLOG_FILE' is an AsciiDoc file then the title
   will be read from the 'BLOG_FILE'.
-  Applicable to 'create' and 'update' commands.
+  Applicable to 'create', 'update' or 'post' commands.
 
 *-d, --doctype*='DOCTYPE'::
   Specifies the type of 'BLOG_FILE'. Allowed values are 'html'
@@ -107,7 +111,7 @@ OPTIONS
   does not handle all HTML tags, this is not an issue with the
   AsciiDoc doctype values because AsciiDoc generates WordPress
   friendly HTML.
-  Applicable to 'create' and 'update' commands.
+  Applicable to 'create', 'update' or 'post' commands.
 
 *-c, --categories*='CATEGORIES'::
   A comma separated list of categories that will be assigned to the
@@ -115,7 +119,7 @@ OPTIONS
   adds or removes the categories from an existing post. Category names
   are case insensitive. If an assigned category does not already exist
   it will be created.
-  Applicable to 'categories' command.
+  Applicable to 'categories', 'create, 'update' or 'post' commands.
 
 *--force*::
   Force blog file and media files to upload even if they have not been

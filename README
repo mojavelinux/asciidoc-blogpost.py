@@ -71,8 +71,8 @@ Installation
   1. Login.
   2. Navigate to 'Settings->Writing->Writing Settings' page.
   3. Uncheck 'Convert emoticons' in the 'Formatting' section (this
-     stops the automatic conversion of text patterns to emoticons
-     emoticons and is optional).
+     option stops the automatic conversion of text patterns to
+     emoticons).
 
 [IMPORTANT]
 =====================================================================

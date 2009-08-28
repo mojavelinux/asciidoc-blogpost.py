@@ -712,7 +712,7 @@ else:
         if not os.path.isfile(blog_file):
             die('missing BLOG_FILE: %s' % blog_file)
         blog_file = os.path.abspath(blog_file)
-    if OPTIONS.doctype not in (None, 'article', 'book', 'manpage', 'html'):
+    if OPTIONS.doctype not in (None,'article','book','manpage','html'):
         parser.error('invalid DOCTYPE: %s' % OPTIONS.doctype)
     if OPTIONS.categories and \
             (command not in ('create','update','categories','post')

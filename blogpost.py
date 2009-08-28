@@ -171,7 +171,7 @@ class Media(object):
         """
         Upload media file to WordPress server if it is new or has changed.
         """
-        checksum = md5.new(open(self.filename).read()).hexdigest()
+        checksum = md5.new(open(self.filename,'rb').read()).hexdigest()
         if not (blog.options.force
                 or self.checksum is None
                 or self.checksum != checksum):
@@ -521,7 +521,7 @@ class Blogpost(object):
             infomsg(post.description)
         # Create/update post.
         # Only update if blog file has changed.
-        checksum = md5.new(open(self.blog_file).read()).hexdigest()
+        checksum = md5.new(open(self.blog_file,'rb').read()).hexdigest()
         if not (self.options.force
                 or self.checksum is None
                 or self.checksum != checksum):

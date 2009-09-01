@@ -350,9 +350,6 @@ class Blogpost(object):
         Processes <a> and <img> tags provided they reference files with
         valid media file name extensions.
 
-        Assumes maximum of one media tag per line -- this is true of AsciiDoc
-        outputs.
-
         Caches the names and checksum of uploaded files in self.cache_file.  If
         self.cache_file is None then caching is not used and no cache file
         written.
@@ -367,10 +364,12 @@ class Blogpost(object):
         result = StringIO.StringIO()
         rexp = re.compile(r'<(?P<tag>(a href)|(img src))="(?P<src>.+?)"')
         for line in self.content:
+            lineout = ''
             mo = rexp.search(line)
-            if mo:
+            while mo:
                 tag = mo.group('tag')
                 src = mo.group('src')
+                url = src
                 if os.path.splitext(src)[1][1:].lower() in media_exts:
                     media_obj = self.media.get(src)
                     media_file = os.path.join(self.media_dir, src)
@@ -387,8 +386,11 @@ class Blogpost(object):
                         media_obj.upload(self)
                         url =  media_obj.url
                         self.updated_at = int(time.time())
-                    line = rexp.sub('<%s="%s"' % (tag, url), line)
-            result.write(line)
+                lineout += line[:mo.start()] + ('<%s="%s"' % (tag, url))
+                line = line[mo.end():]
+                mo = rexp.search(line)
+            lineout += line
+            result.write(lineout)
         result.seek(0)
         self.content = result
 

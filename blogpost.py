@@ -4,7 +4,7 @@ Wordpress command-line weblog client for AsciiDoc.
 
 Copyright: Stuart Rackham (c) 2008
 License:   MIT
-Email:     srackham@methods.co.nz
+Email:     srackham@gmail.com
 
 """
 
@@ -362,14 +362,13 @@ class Blogpost(object):
             'mp3','ogg','wav','m4a','mov','wmv','avi','mpg',
         )
         result = StringIO.StringIO()
-        rexp = re.compile(r'(?i)<(?P<tag>(a href)|(img src))="(?P<src>.+?)"')
+        rexp = re.compile(r'(?i)<(?P<tag>(a\b[^>]* href)|(img\b[^>]* src))="(?P<src>.+?)"')
         for line in self.content:
             lineout = ''
             mo = rexp.search(line)
             while mo:
                 tag = mo.group('tag')
                 src = mo.group('src')
-                print tag, src
                 url = src
                 if os.path.splitext(src)[1][1:].lower() in media_exts:
                     media_obj = self.media.get(src)

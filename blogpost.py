@@ -8,8 +8,6 @@ Email:     srackham@gmail.com
 
 """
 
-VERSION = '0.9.3'
-
 import sys
 import os
 import time
@@ -24,6 +22,10 @@ import calendar
 
 import wordpresslib # http://www.blackbirdblog.it/programmazione/progetti/28
 import asciidocapi
+
+
+VERSION = '0.9.3'
+PROG = os.path.basename(os.path.splitext(__file__)[0])
 
 
 ######################################################################
@@ -62,13 +64,13 @@ class Namespace(object):
         self.__class__ = Cache      # Cache class name change in 0.9.1
 
 def errmsg(msg):
-    sys.stderr.write('%s\n' % msg)
+    sys.stderr.write('%s: %s\n' % (PROG,msg))
 
 def infomsg(msg):
-    print msg
+    print '%s: %s' % (PROG,msg)
 
 def die(msg):
-    errmsg('\nERROR: %s' % msg)
+    errmsg('ERROR: %s' % msg)
     errmsg("       view options with '%s --help'" % os.path.basename(__file__))
     sys.exit(1)
 
@@ -518,9 +520,6 @@ class Blogpost(object):
         # Make HTML WordPress friendly.
         self.sanitize_html()
         post.description = self.content.read()
-        if self.options.verbose:
-            # This can be a lot of output so only show if the user asks.
-            infomsg('html content: %s' % post.description)
         # Create/update post.
         # Only update if blog file has changed.
         checksum = md5.new(open(self.blog_file,'rb').read()).hexdigest()
@@ -645,7 +644,7 @@ else:
     description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: %s. BLOG_FILE is AsciiDoc (or optionally HTML) text file.""" % ', '.join(long_commands)
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [BLOG_FILE]',
-        version='%prog ' + VERSION,
+        version='%s %s' % (PROG,VERSION),
         description=description)
     parser.add_option('-f', '--conf-file',
         dest='conf_file', default=None, metavar='CONF_FILE',
@@ -695,12 +694,12 @@ else:
         OPTIONS.__dict__['pages'] = False
     # Validate options and command arguments.
     if OPTIONS.publish and OPTIONS.unpublish:
-        parser.error('--publish and --unpublish are mutually exclusive')
+        die('--publish and --unpublish are mutually exclusive')
     command = args[0]
     if command in short_commands.keys():
         command = short_commands[command]
     if command not in long_commands:
-        parser.error('invalid command: %s' % command)
+        die('invalid command: %s' % command)
     blog_file = None
     if len(args) == 1 and command in ('categories','delete','list'):
         # No command arguments.
@@ -709,25 +708,25 @@ else:
         # Single command argument BLOG_FILE
         blog_file = args[1]
     else:
-        parser.error('too few or too many arguments')
+        die('too few or too many arguments')
     if blog_file is not None:
         if not os.path.isfile(blog_file):
             die('missing BLOG_FILE: %s' % blog_file)
         blog_file = os.path.abspath(blog_file)
     if OPTIONS.doctype not in (None,'article','book','manpage','html'):
-        parser.error('invalid DOCTYPE: %s' % OPTIONS.doctype)
+        die('invalid DOCTYPE: %s' % OPTIONS.doctype)
     if OPTIONS.categories and \
             (command not in ('create','update','categories','post')
              or (not blog_file or OPTIONS.post_id)):
-        parser.error('--categories is inappropriate')
+        die('--categories is inappropriate')
     # --post-id option checks.
     if command not in ('delete','update','categories','post') and OPTIONS.post_id is not None:
-        parser.error('--post-id is incompatible with %s command' % command)
+        die('--post-id is incompatible with %s command' % command)
     if command == 'delete':
         if blog_file is None and OPTIONS.post_id is None:
-            parser.error('specify the BLOG_FILE or use --post-id option')
+            die('specify the BLOG_FILE or use --post-id option')
         elif blog_file is not None and OPTIONS.post_id is not None:
-            parser.error('specify the BLOG_FILE or use --post-id option but not both')
+            die('specify the BLOG_FILE or use --post-id option but not both')
     # If conf file exists in $HOME directory load it.
     home_dir = os.environ.get('HOME')
     if home_dir is not None:

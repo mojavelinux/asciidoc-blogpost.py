@@ -39,6 +39,9 @@ COMMANDS
   Delete weblog post. Deletes the 'BLOG_FILE' blogpost cache
   file but not the 'BLOG_FILE'.
 
+*dump*::
+  Convert the AsciiDoc 'BLOG_FILE' to HTML and print on 'stdout'.
+
 *i, info*::
   Print weblog post information. Information is sourced from the
   client-side 'BLOG_FILE' blogpost cache file.
@@ -50,9 +53,6 @@ COMMANDS
 *p, post*::
   Post the weblog post. This is the same as the 'create' command if a
   new post, or the 'update' command if previously posted.
-
-*o, output*::
-  Convert the AsciiDoc 'BLOG_FILE' to HTML and print on 'stdout'.
 
 *u, update*::
   Update existing weblog post with the contents of the 'BLOG_FILE'.

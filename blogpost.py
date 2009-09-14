@@ -481,7 +481,7 @@ class Blogpost(object):
         assert(self.id is not None)
         self.post()
 
-    def output(self):
+    def dump(self):
         self.asciidoc2html()
         self.sanitize_html()
         print self.content.read()
@@ -520,7 +520,7 @@ class Blogpost(object):
         post.description = self.content.read()
         if self.options.verbose:
             # This can be a lot of output so only show if the user asks.
-            infomsg(post.description)
+            infomsg('html content: %s' % post.description)
         # Create/update post.
         # Only update if blog file has changed.
         checksum = md5.new(open(self.blog_file,'rb').read()).hexdigest()
@@ -640,7 +640,7 @@ if __name__ != '__main__':
                 categories = ''
             )
 else:
-    long_commands = ('create','categories','delete','info','list','post','update')
+    long_commands = ('create','categories','delete','dump','info','list','post','update')
     short_commands = {'c':'create', 'cat':'categories', 'd':'delete', 'i':'info', 'l':'list', 'p':'post', 'u':'update'}
     description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: %s. BLOG_FILE is AsciiDoc (or optionally HTML) text file.""" % ', '.join(long_commands)
     from optparse import OptionParser
@@ -705,7 +705,7 @@ else:
     if len(args) == 1 and command in ('categories','delete','list'):
         # No command arguments.
         pass
-    elif len(args) == 2 and command in ('create','categories','delete','info','update','post'):
+    elif len(args) == 2 and command in ('create','categories','delete','dump','info','update','post'):
         # Single command argument BLOG_FILE
         blog_file = args[1]
     else:
@@ -791,6 +791,8 @@ else:
             if blog.id is None:
                 die('missing cache file: specify --post-id instead')
             blog.delete()
+        elif command == 'dump':
+            blog.dump()
         elif command in ('post','create','update'):
             if blog.id is not None and command == 'create':
                 die('document has been previously posted, use update command')

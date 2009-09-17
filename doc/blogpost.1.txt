@@ -29,6 +29,7 @@ COMMANDS
 --------
 *c, create*::
   Create a new weblog post using the contents of the 'BLOG_FILE'.
+  See the <<X2,BLOG FILE section>>.
 
 *cat, categories*::
   Specify the '--categories' option and either a 'BLOG_FILE' or a
@@ -139,6 +140,21 @@ OPTIONS
 '--post-id', '--publish', '--unpublish' and '--title'.  This means
 that once a weblog post has been created you won't need to use them in
 subsequent commands unless you decide to change them.
+
+
+[[X2]]
+BLOG FILE
+---------
+The 'BLOG_FILE' is an http://www.methods.co.nz/asciidoc/[AsciiDoc]
+formatted text file.  'blogpost(1)' uses 'asciidoc(1)' to convert the
+blog file to WordPress compatible HTML. If the '--doctype=html' then
+the AsciiDoc conversion is skipped.
+
+You can insert a WordPress
+http://support.wordpress.com/splitting-content/more-tag/[more tag] in
+the blog file using the AsciiDoc block passthrugh macro:
+
+  pass::[<!--more-->]
 
 
 [[X1]]

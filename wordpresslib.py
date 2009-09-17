@@ -223,7 +223,8 @@ class WordPressClient:
 		"""
 		blogContent = {
 			'title' : post.title,
-			'description' : post.description	
+			'description' : post.description,
+			'mt_text_more': post.textMore,
 		}
 		
 		# add categories
@@ -384,7 +385,7 @@ class WordPressClient:
 	# NOTES:
 	# - Page API docs at http://www.sixapart.com/developers/xmlrpc/pages_api/
 	# - publishPost, getPost, editPost, deletePost XML-RPC calls  seem to
-	#	work on Pages but the code here makes no use of this undocument
+	#	work on Pages but the code here makes no use of this undocumented
 	#	property.
 	# - getPages does not return unpublished pages.
 	##############
@@ -434,6 +435,7 @@ class WordPressClient:
 		blogContent = {
 			'title' : post.title,
 			'description' : post.description,
+			'mt_text_more': post.textMore,
 			'permaLink' : post.permaLink,
 		}
 		
@@ -448,6 +450,7 @@ class WordPressClient:
 		blogcontent = {
 			'title' : post.title,
 			'description' : post.description,
+			'mt_text_more': post.textMore,
 			'permaLink' : post.permaLink,
 		}
 		

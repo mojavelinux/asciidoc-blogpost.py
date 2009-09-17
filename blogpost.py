@@ -519,7 +519,11 @@ class Blogpost(object):
             self.process_media()
         # Make HTML WordPress friendly.
         self.sanitize_html()
-        post.description = self.content.read()
+        # Set post content.
+        s = re.split(r'<!--\s*more\s*-->', self.content.read(), maxsplit=1)
+        post.description = s[0]
+        if len(s) == 2:
+            post.textMore = s[1]
         # Create/update post.
         # Only update if blog file has changed.
         checksum = md5.new(open(self.blog_file,'rb').read()).hexdigest()

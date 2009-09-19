@@ -71,7 +71,6 @@ def infomsg(msg):
 
 def die(msg):
     errmsg('ERROR: %s' % msg)
-    errmsg("       view options with '%s --help'" % os.path.basename(__file__))
     sys.exit(1)
 
 def verbose(msg):
@@ -747,11 +746,11 @@ else:
                 blog.set_categories()
         else:
             assert(False)
-    except (wordpresslib.WordPressException, xmlrpclib.ProtocolError,
-            asciidocapi.AsciiDocAPI), e:
-        msg = e.message
-        if not msg:
-            # xmlrpclib.ProtocolError does not set message attribute.
-            msg = e
-        die(msg)
+    except asciidocapi.AsciiDocError, e:
+        errmsg(e.message)
+        sys.exit(1)
+    except wordpresslib.WordPressException, e:
+        die(e.message)
+    except xmlrpclib.ProtocolError, e:
+        die(e)
 

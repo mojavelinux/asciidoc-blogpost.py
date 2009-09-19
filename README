@@ -90,3 +90,8 @@ Bugs
 - Under some circumstances WordPress converts three periods to an
   elipsis character and double dashes to the em dashes, there doesn't
   seem to be a way to turn this off.
+- WordPress does not appear to recognise list numbering styles and all
+  numbered lists are rendered with decimal numbering (WordPress
+  default theme).
+- WordPress nested unordered lists all have the same bullet style
+  (WordPress default theme).

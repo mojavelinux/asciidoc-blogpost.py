@@ -74,57 +74,9 @@ def die(msg):
     errmsg("       view options with '%s --help'" % os.path.basename(__file__))
     sys.exit(1)
 
-def trace():
-    """Print traceback to stderr."""
-    errmsg('-'*60)
-    traceback.print_exc(file=sys.stderr)
-    errmsg('-'*60)
-
 def verbose(msg):
     if OPTIONS.verbose or OPTIONS.dry_run:
         infomsg(msg)
-
-def user_says_yes(prompt, default=None):
-    """
-    Prompt user to answer yes or no.
-    Return True is user answers yes, False if no.
-    """
-    if default is True:
-        prompt += ' [Y/n]:'
-    elif default is False:
-        prompt += ' [y/N]:'
-    else:
-        prompt += ' [y/n]:'
-    while True:
-        print prompt,
-        s = raw_input().strip()
-        if re.match(r'^[nN]', s):
-            result = False
-            break
-        if re.match(r'^[yY]', s):
-            result = True
-            break
-        if s == '' and default is not None:
-            result = default
-            break
-    print
-    return result
-
-def user_input(prompt, pat, default=None):
-    """
-    Prompt the user for input until it matches regular expression 'pat'.
-    """
-    while True:
-        if default is not None:
-            prompt += ' [%s]' % default
-        print '%s:' % prompt,
-        s = raw_input().strip()
-        pat = r'^' + pat + r'$'
-        if re.match(pat, s) or (s == '' and default is not None):
-            break
-    if s == '':
-        s = default
-    return s
 
 def load_conf(conf_file):
     """
@@ -132,21 +84,6 @@ def load_conf(conf_file):
     configuration settings.
     """
     execfile(conf_file, globals())
-
-def exec_args(args, dry_run=False, is_verbose=False):
-    verbose('executing: %s' % ' '.join(args))
-    if not dry_run:
-        if is_verbose:
-            stderr = None
-        else:
-            stderr = subprocess.PIPE
-        p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=stderr)
-        result = p.communicate()[0]
-        if p.returncode != 0:
-            raise subprocess.CalledProcessError(p.returncode, ' '.join(args))
-    else:
-        result = ''
-    return result
 
 
 ###########
@@ -182,7 +119,7 @@ class Media(object):
             infomsg('uploading: %s...' % self.filename)
             if not blog.options.dry_run:
                 self.url =  blog.server.newMediaObject(self.filename)
-                print 'url: %s' % self.url
+                infomsg('url: %s' % self.url)
             else:
                 self.url = self.filename  # Dummy value for debugging.
             self.checksum = checksum
@@ -485,7 +422,6 @@ class Blogpost(object):
 
     def dump(self):
         self.asciidoc2html()
-        self.sanitize_html()
         print self.content.read()
 
     def post(self):
@@ -547,10 +483,10 @@ class Blogpost(object):
                         self.server.editPage(self.id, post, self.is_published())
                     else:
                         self.server.editPost(self.id, post, self.is_published())
-            print 'id: %s' % self.id
+            infomsg('id: %s' % self.id)
             # Get post so we can find what it's url and creation date is.
             post = self.get_post()
-            print 'url: %s' % post.permaLink
+            infomsg('url: %s' % post.permaLink)
             self.updated_at = int(time.time())
         self.save_cache()
 

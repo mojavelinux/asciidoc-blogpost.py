@@ -123,8 +123,12 @@ OPTIONS
   Applicable to 'categories', 'create, 'update' or 'post' commands.
 
 *--force*::
-  Force blog file and media files to upload even if they have not been
-  modified since the last update command.
+  Force blog file to upload even if it has not been modified since the
+  last update command.
+
+*--force-media*::
+  Force media files to upload even if they have not been modified
+  since the last update command.
 
 *-n, --dry-run*::
   Simulate command execution without doing anything, instead report

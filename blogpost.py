@@ -110,7 +110,7 @@ class Media(object):
         Upload media file to WordPress server if it is new or has changed.
         """
         checksum = md5.new(open(self.filename,'rb').read()).hexdigest()
-        if not (blog.options.force
+        if not (blog.options.force_media
                 or self.checksum is None
                 or self.checksum != checksum):
             infomsg('skipping unmodified: %s' % self.filename)
@@ -619,7 +619,10 @@ else:
         help='comma separated list of post categories')
     parser.add_option('--force',
         action='store_true', dest='force', default=False,
-        help='force blog file and media upload')
+        help='force blog file to upload')
+    parser.add_option('--force-media',
+        action='store_true', dest='force_media', default=False,
+        help='force media files to upload')
     parser.add_option('-n', '--dry-run',
         action='store_true', dest='dry_run', default=False,
         help='show what would have been done')

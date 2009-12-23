@@ -64,7 +64,7 @@ class Namespace(object):
         self.__class__ = Cache      # Cache class name change in 0.9.1
 
 def errmsg(msg):
-    sys.stderr.write('%s: %s\n' % (PROG,msg))
+    sys.stderr.write(('%s: %s\n' % (PROG,msg)).encode(sys.stderr.encoding))
 
 def infomsg(msg):
     print '%s: %s' % (PROG,msg)

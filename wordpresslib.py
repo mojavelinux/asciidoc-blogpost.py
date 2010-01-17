@@ -56,6 +56,7 @@ import os
 import xmlrpclib
 import datetime
 import time
+import httplib
 
 class WordPressException(exceptions.Exception):
 	"""Custom exception for WordPress client operations
@@ -115,18 +116,41 @@ class WordPressPost:
 		self.allowPings	= False
 		self.allowComments = False
 
-		
+class ProxiedTransport(xmlrpclib.Transport):
+	"""Access xml-rpc through a proxy, copy from 
+	   http://docs.python.org/library/xmlrpclib.html#convenience-functions
+	"""
+
+	def set_proxy(self, proxy):
+		self.proxy = proxy
+
+	def make_connection(self, host):
+		self.realhost = host
+		h = httplib.HTTP(self.proxy)
+		return h
+
+	def send_request(self, connection, handler, request_body):
+		connection.putrequest("POST", 'http://%s%s' % (self.realhost, handler))
+
+	def send_host(self, connection, host):
+		connection.putheader('Host', self.realhost)
+
 class WordPressClient:
 	"""Client for connect to WordPress XML-RPC interface
 	"""
 	
-	def __init__(self, url, user, password):
+	def __init__(self, url, user, password, proxy=None):
 		self.url = url
 		self.user = user
 		self.password = password
 		self.blogId = 0
 		self.categories = None
-		self._server = xmlrpclib.ServerProxy(self.url)
+		if not proxy:
+			self._server = xmlrpclib.ServerProxy(self.url)
+		else:
+			p = ProxiedTransport()
+			p.set_proxy(proxy)
+			self._server = xmlrpclib.Server(self.url, transport=p)
 
 	def _filterPost(self, post):
 		"""Transform post struct in WordPressPost instance 

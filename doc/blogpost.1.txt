@@ -134,6 +134,9 @@ OPTIONS
   Simulate command execution without doing anything, instead report
   what would have been done.
 
+*--proxy*='URL'::
+  Send WordPress XML-RPC via proxy server 'URL'.
+
 *-v, --verbose*::
   Print more information about the actions being performed to
   'stdout'. Combine this option with '--dry-run' to view the uploaded

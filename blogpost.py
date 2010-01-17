@@ -159,9 +159,9 @@ class Blogpost(object):
         self.username = username        # WordPress account user name.
         self.password = password        # WordPress account password.
         verbose('wordpress server: %s:%s@%s' %
-                (self.username, self.password, self.server_url))
+            (self.username, self.password, self.server_url))
         self.server = wordpresslib.WordPressClient(
-                self.server_url, self.username, self.password)
+            self.server_url, self.username, self.password, self.options.proxy)
         self.server.selectBlog(0)
 
     def is_html(self):
@@ -626,6 +626,9 @@ else:
     parser.add_option('-n', '--dry-run',
         action='store_true', dest='dry_run', default=False,
         help='show what would have been done')
+    parser.add_option('--proxy',
+        dest='proxy', default=None, metavar='URL',
+        help='set a proxy server')
     parser.add_option('-v', '--verbose',
         action='store_true', dest='verbose', default=False,
         help='increase verbosity')

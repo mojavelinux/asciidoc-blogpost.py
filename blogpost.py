@@ -11,9 +11,7 @@ Email:     srackham@gmail.com
 import sys
 import os
 import time
-import subprocess
 import StringIO
-import traceback
 import re
 import xmlrpclib
 import pickle
@@ -68,6 +66,9 @@ def errmsg(msg):
 
 def infomsg(msg):
     print '%s: %s' % (PROG,msg)
+
+def warning(msg):
+    infomsg('WARNING: '+msg)
 
 def die(msg):
     errmsg('ERROR: %s' % msg)
@@ -133,6 +134,9 @@ class Cache(Namespace):
 
 class Blogpost(object):
 
+    # Valid AsciiDoc attribute blog parameter names (sans the 'blogpost-' prefix).
+    ATTRIBUTE_NAMES = ('categories','status','title','doctype','posttype')
+
     def __init__(self, server_url, username, password, options):
         # options contains the command-line options attributes.
         self.options = options
@@ -153,6 +157,7 @@ class Blogpost(object):
         self.cache_file = None  # Cache file containing persistant blog data.
         self.media_dir = None
         self.content = None     # File-like object containing blog content.
+        self.attributes = {}    # AsciiDoc attribute parameter values.
         # XML-RPC server.
         self.server = None              # wordpresslib.WordPressClient.
         self.server_url = server_url    # WordPress XML-RPC server URL.
@@ -278,6 +283,52 @@ class Blogpost(object):
             infomsg('deleting cache file: %s' % self.cache_file)
             if not self.options.dry_run:
                 os.unlink(self.cache_file)
+
+    def get_attributes(self):
+        '''
+        Load blogpost attributes from AsciiDoc blogpost file.
+        Check attribute value validity.
+        '''
+        def check_value(*valid_values):
+            if value not in valid_values:
+                die('%s: line %d: invalid attribute value: blogpost-%s: %s' %
+                    (os.path.basename(self.blog_file), lineno, name, value))
+
+        if self.blog_file is None:
+            return
+        if os.path.splitext(self.blog_file)[1].lower() in ('.htm','.html'):
+            return
+        reo = re.compile(r':blogpost-(?P<name>[-\w]+):\s+(?P<value>.*)')
+        lineno = 1
+        for line in open(self.blog_file):
+            mo = re.match(reo, line)
+            if mo:
+                name = mo.group('name')
+                value = mo.group('value').strip()
+                if name in self.ATTRIBUTE_NAMES:
+                    self.attributes[name] = value
+                else:
+                    warning('%s: line %d: invalid attribute name: blogpost-%s' %
+                            (os.path.basename(self.blog_file), lineno, name))
+                if name == 'status':
+                    check_value('published','unpublished')
+                elif name == 'doctype':
+                    check_value('article','book','manpage')
+                elif name == 'posttype':
+                    check_value('page','post')
+            lineno += 1
+
+    def check_attributes(self):
+        '''
+        Check we have the attributes required by the --attributes option.
+        '''
+        if OPTIONS.attributes:
+            for name in OPTIONS.attributes.split(','):
+                if name not in self.ATTRIBUTE_NAMES:
+                    die('illegal --attributes name: %s' % name)
+                if name not in self.attributes:
+                    die('%s: missing required attribute: blogpost-%s' %
+                        (os.path.basename(self.blog_file), name))
 
     def process_media(self):
         """
@@ -585,6 +636,9 @@ else:
     parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [BLOG_FILE]',
         version='%s %s' % (PROG,VERSION),
         description=description)
+    parser.add_option('-a', '--attributes',
+        dest='attributes', default='', metavar='ATTRIBUTES',
+        help='comma separated of list required attribute parameter names')
     parser.add_option('-f', '--conf-file',
         dest='conf_file', default=None, metavar='CONF_FILE',
         help='configuration file')
@@ -663,7 +717,7 @@ else:
     if OPTIONS.categories and \
             (command not in ('create','update','categories','post')
              or (not blog_file or OPTIONS.post_id)):
-        die('--categories is inappropriate')
+        die('--categories is not applicable')
     # --post-id option checks.
     if command not in ('delete','update','categories','post') and OPTIONS.post_id is not None:
         die('--post-id is incompatible with %s command' % command)
@@ -698,27 +752,31 @@ else:
             blog.media_dir = OPTIONS.media_dir
         blog.set_blog_file(blog_file)
         blog.load_cache()
+        blog.get_attributes()
+        blog.check_attributes()
+        blog.title = blog.attributes.get('title', blog.title)
         if OPTIONS.title is not None:
             blog.title = OPTIONS.title
         if OPTIONS.post_id is not None:
             blog.id = OPTIONS.post_id
+        blog.post_type = blog.attributes.get('posttype', blog.post_type)
         if OPTIONS.pages:
-            if blog.post_type == 'post':
-                infomsg('WARNING: document was previously posted as a post')
             blog.post_type = 'page'
         if blog.post_type is None:
-            blog.post_type = 'post'     # Default if not in cache.
+            blog.post_type = 'post'     # Default.
+        blog.status = blog.attributes.get('status', blog.status)
         if OPTIONS.publish:
             blog.status = 'published'
         if OPTIONS.unpublish:
             blog.status = 'unpublished'
         if blog.status is None:
-            blog.status = 'published'   # Default if not in cache.
+            blog.status = 'published'   # Default.
+        blog.doctype = blog.attributes.get('doctype', blog.doctype)
         if OPTIONS.doctype is not None:
             blog.doctype = OPTIONS.doctype
         if blog.doctype is None:
-            blog.doctype = 'article'    # Default if not in cache.
-
+            blog.doctype = 'article'    # Default.
+        OPTIONS.categories = blog.attributes.get('categories', OPTIONS.categories)
         # Handle commands.
         if command == 'info':
             if not os.path.isfile(blog.cache_file):

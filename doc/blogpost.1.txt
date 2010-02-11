@@ -33,8 +33,9 @@ COMMANDS
 
 *cat, categories*::
   Specify the '--categories' option and either a 'BLOG_FILE' or a
-  '--post-id' to set the Post categories.  If the '--categories'
-  option is not specified then all weblog categories are listed.
+  '--post-id' to set the post's categories.  If the '--categories'
+  option is not specified then all weblog categories for all posts are
+  listed.
 
 *d, delete*::
   Delete weblog post. Deletes the 'BLOG_FILE' blogpost cache
@@ -66,6 +67,14 @@ OPTIONS
 
 *-h, --help*::
   Show this help message and exit.
+
+*-a, --attributes*='ATTRIBUTES'::
+  Specifies a comma separated list of one or more weblog parameters
+  that must be defined in the 'BLOG_FILE'. If this option is not
+  present then 'BLOG_FILE' attribute parameter definitions are
+  optional.
+  See the <<X3,ATTRIBUTE PARAMETERS section>>.
+  Applicable to 'create', 'update' or 'post' commands.
 
 *-f, --conf-file*='CONF_FILE'::
   Use configuration file 'CONF_FILE'. This file is read after the
@@ -99,9 +108,10 @@ OPTIONS
   with the relative path name.
 
 *-t, --title*='TITLE'::
-  Set the weblog post title If this option is omitted and there is no
-  cache file and the 'BLOG_FILE' is an AsciiDoc file then the title
-  will be read from the 'BLOG_FILE'.
+  Set the weblog post title. If this option is omitted and the
+  'blogpost-title' attribute is not defined in the 'BLOG_FILE' and the
+  title is not in the cache file then the AsciiDoc 'BLOG_FILE' title is
+  used.
   Applicable to 'create', 'update' or 'post' commands.
 
 *-d, --doctype*='DOCTYPE'::
@@ -162,6 +172,53 @@ http://support.wordpress.com/splitting-content/more-tag/[more tag] in
 the blog file using the AsciiDoc block passthrugh macro:
 
   pass::[<!--more-->]
+
+
+[[X3]]
+ATTRIBUTE PARAMETERS
+--------------------
+Blogpost allows the following weblog parameters to be defined inside
+an AsciiDoc 'BLOG_FILE': *categories*, *status*, *title*, *doctype*,
+*posttype*.  The parameters are defined using AsciiDoc attribute
+entries -- the parameter name, prefixed with *blogpost-*, forms the
+corresponding AsciiDoc attribute name. Examples:
+
+  :blogpost-status: published 
+  :blogpost-categories: blogpost,AsciiDoc,Weblog client,WordPress
+
+The '--attributes' option is used to make selected 'BLOG_FILE'
+attribute entries mandatory. Example:
+
+  --attributes=status,categories
+
+Parameter precedence is (from highest to lowest):
+
+1. Command-line options.
+2. AsciiDoc attribute entries.
+3. Blogpost cache.
+
+[options="header"]
+|====================================================================
+|Weblog parameter name |AsciiDoc attribute name |Allowed values
+
+|categories |blogpost-categories |
+Comma separated list of weblog category names (see '--categories'
+option).
+
+|doctype |blogpost-doctype |
+*article*, *book* or *manpage* (see '--doctype' option).
+
+|posttype |blogpost-posttype |
+*post* or *page* (see '--pages' option).
+
+|status |blogpost-status |
+*published* or *unpublished* (see 'published' and '--unpublished'
+options).
+
+|title |blogpost-title |
+Weblog title (see '--title' option).
+
+|====================================================================
 
 
 [[X1]]
@@ -257,6 +314,6 @@ Written by Stuart Rackham, <mailto:srackham@gmail.com[]>
 
 COPYING
 -------
-Copyright \(C) 2008 Stuart Rackham. Free use of this software is
+Copyright \(C) 2008-2010 Stuart Rackham. Free use of this software is
 granted under the terms of the MIT License.
 

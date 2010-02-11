@@ -718,6 +718,8 @@ else:
             (command not in ('create','update','categories','post')
              or (not blog_file or OPTIONS.post_id)):
         die('--categories is not applicable')
+    if command == 'categories' and blog_file and not OPTIONS.categories:
+        die('missing --categories option')
     # --post-id option checks.
     if command not in ('delete','update','categories','post') and OPTIONS.post_id is not None:
         die('--post-id is incompatible with %s command' % command)

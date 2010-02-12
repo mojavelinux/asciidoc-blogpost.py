@@ -462,10 +462,12 @@ class Blogpost(object):
                     die('failed to delete post %d' % self.id)
         self.delete_cache()
 
+    # DEPRECATED: create and update commands.
     def create(self):
         assert(self.id is None)
         self.post()
 
+    # DEPRECATED: create and update commands.
     def update(self):
         assert(self.id is not None)
         self.post()
@@ -629,9 +631,10 @@ if __name__ != '__main__':
                 categories = ''
             )
 else:
+    # DEPRECATED: create and update commands.
     long_commands = ('create','categories','delete','dump','info','list','post','update')
     short_commands = {'c':'create', 'cat':'categories', 'd':'delete', 'i':'info', 'l':'list', 'p':'post', 'u':'update'}
-    description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: %s. BLOG_FILE is AsciiDoc (or optionally HTML) text file.""" % ', '.join(long_commands)
+    description = """A Wordpress command-line weblog client for AsciiDoc. COMMAND can be one of: categories, delete, dump, info, list, post. BLOG_FILE is AsciiDoc (or optionally HTML) text file."""
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [BLOG_FILE]',
         version='%s %s' % (PROG,VERSION),

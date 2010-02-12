@@ -27,10 +27,6 @@ and list weblog entries from the command-line.
 
 COMMANDS
 --------
-*c, create*::
-  Create a new weblog post using the contents of the 'BLOG_FILE'.
-  See the <<X2,BLOG FILE section>>.
-
 *cat, categories*::
   Specify the '--categories' option and either a 'BLOG_FILE' or a
   '--post-id' to set the post's categories.  If the '--categories'
@@ -53,11 +49,9 @@ COMMANDS
   WordPress server. Use the '--pages' option to list published Pages.
 
 *p, post*::
-  Post the weblog post. This is the same as the 'create' command if a
-  new post, or the 'update' command if previously posted.
-
-*u, update*::
-  Update existing weblog post with the contents of the 'BLOG_FILE'.
+  Post the 'BLOG_FILE' to the weblog. If this is the first time the
+  'BLOG_FILE' has been posted a new post is created, otherwise the
+  existing post is updated.
 
 
 OPTIONS
@@ -74,7 +68,7 @@ OPTIONS
   present then 'BLOG_FILE' attribute parameter definitions are
   optional.
   See the <<X3,ATTRIBUTE PARAMETERS section>>.
-  Applicable to 'create', 'update' or 'post' commands.
+  Applicable to 'post' command.
 
 *-f, --conf-file*='CONF_FILE'::
   Use configuration file 'CONF_FILE'. This file is read after the
@@ -82,11 +76,11 @@ OPTIONS
 
 *-u, --unpublish*::
   Set weblog post status to 'unpublished'.
-  Applicable to 'create', 'update' or 'post' commands.
+  Applicable to 'post' command.
 
 *-U, --publish*::
   Set weblog post status to 'published'.
-  Applicable to 'create', 'update' or 'post' commands.
+  Applicable to 'post' command.
 
 *--post-id*='POST_ID'::
   Explicitly specify the weblog post ID number. This option will only
@@ -95,11 +89,11 @@ OPTIONS
 
 *-p, --pages*::
   Apply 'COMMAND' to weblog 'Pages' rather than normal weblog 'Posts'.
-  Applicable to 'create', 'delete', 'list', 'post' and 'update' commands.
+  Applicable to 'delete', 'list' and 'post' commands.
 
 *-M, --no-media*::
   Do not upload media files.
-  Applicable to 'create', 'update' or 'post' commands.
+  Applicable to 'post' command.
 
 *--media-dir=MEDIA_DIR*::
   The name of the directory containing those media files that have
@@ -112,7 +106,7 @@ OPTIONS
   'blogpost-title' attribute is not defined in the 'BLOG_FILE' and the
   title is not in the cache file then the AsciiDoc 'BLOG_FILE' title is
   used.
-  Applicable to 'create', 'update' or 'post' commands.
+  Applicable to 'post' command.
 
 *-d, --doctype*='DOCTYPE'::
   Specifies the type of 'BLOG_FILE'. Allowed values are 'html'
@@ -122,7 +116,7 @@ OPTIONS
   does not handle all HTML tags, this is not an issue with the
   AsciiDoc doctype values because AsciiDoc generates WordPress
   friendly HTML.
-  Applicable to 'create', 'update' or 'post' commands.
+  Applicable to 'post' command.
 
 *-c, --categories*='CATEGORIES'::
   A comma separated list of categories that will be assigned to the
@@ -130,7 +124,7 @@ OPTIONS
   adds or removes the categories from an existing post. Category names
   are case insensitive. If an assigned category does not already exist
   it will be created.
-  Applicable to 'categories', 'create, 'update' or 'post' commands.
+  Applicable to 'categories' and 'post' commands.
 
 *--force*::
   Force blog file to upload even if it has not been modified since the
@@ -234,9 +228,9 @@ previously uploaded media (source paths, server URLs and media file
 MD5 checksums) in client-side per-document cache files.  Cache files
 are stored in the same directory as the source 'BLOG_FILE' but with
 '.blogpost' file name extensions. A document's cache file is read
-before 'blogpost' runs a command and is updated after running 'create'
-and 'update' commands.  The 'delete' and 'reset' commands delete a
-document's cache file.
+before 'blogpost' runs a command and is updated after running the
+'post' command.  The 'delete' and 'reset' commands delete a document's
+cache file.
 
 'blogpost' uses cache files to ensure only new or modified media files
 are uploaded to the WordPress server.  Because the caching is on a
@@ -246,8 +240,8 @@ In addition to storing media metadata, blogpost cache files also store
 the weblog post ID, URL, title, creation and update timestamps along
 with the last used value of many of the 'blogpost' command options.
 This is very handy, it means you don't have to remember the weblog
-post ID or the options you used to create the weblog when you run the
-'update' command (unless of course you want to change something).
+post ID or the options you used to create the weblog when you rerun
+the 'post' command.
 
 
 MEDIA PROCESSING
@@ -289,10 +283,10 @@ EXAMPLES
 --------
 Create, list, update and delete a weblog post:
 
-  blogpost.py create blogging_with_asciidoc.txt
+  blogpost.py post blogging_with_asciidoc.txt
   blogpost.py info blogging_with_asciidoc.txt
   blogpost.py list
-  blogpost.py update blogging_with_asciidoc.txt
+  blogpost.py post blogging_with_asciidoc.txt
   blogpost.py delete blogging_with_asciidoc.txt
 
 

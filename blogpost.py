@@ -642,50 +642,50 @@ else:
     parser.add_option('-a', '--attributes',
         dest='attributes', default='', metavar='ATTRIBUTES',
         help='comma separated of list required attribute parameter names')
-    parser.add_option('-f', '--conf-file',
-        dest='conf_file', default=None, metavar='CONF_FILE',
-        help='configuration file')
-    parser.add_option('-U', '--publish',
-        action='store_true', dest='publish', default=False,
-        help='set post status to published')
-    parser.add_option('-u', '--unpublish',
-        action='store_true', dest='unpublish', default=False,
-        help='set post status to unpublished')
-    if hasattr(wordpresslib.WordPressClient, 'getPage'):
-        # We have patched wordpresslib module so enable --pages option.
-        parser.add_option('-p', '--pages',
-            action='store_true', dest='pages', default=False,
-            help='apply COMMAND to weblog pages')
-    parser.add_option('-t', '--title',
-        dest='title', default=None, metavar='TITLE',
-        help='set post TITLE')
-    parser.add_option('-d', '--doctype',
-        dest='doctype', default=None, metavar='DOCTYPE',
-        help='document type (article, book, manpage, html)')
-    parser.add_option('-M', '--no-media',
-        action='store_false', dest='media', default=True,
-        help='do not process document media objects')
-    parser.add_option('--media-dir',
-        dest='media_dir', default=None, metavar='MEDIA_DIR',
-        help='set location of media files')
-    parser.add_option('--post-id', type='int',
-        dest='post_id', default=None, metavar='POST_ID',
-        help='blog post ID number')
     parser.add_option('-c', '--categories',
         dest='categories', default='', metavar='CATEGORIES',
         help='comma separated list of post categories')
+    parser.add_option('-d', '--doctype',
+        dest='doctype', default=None, metavar='DOCTYPE',
+        help='document type (article, book, manpage, html)')
+    parser.add_option('-f', '--conf-file',
+        dest='conf_file', default=None, metavar='CONF_FILE',
+        help='configuration file')
     parser.add_option('--force',
         action='store_true', dest='force', default=False,
         help='force blog file to upload')
     parser.add_option('--force-media',
         action='store_true', dest='force_media', default=False,
         help='force media files to upload')
+    parser.add_option('--media-dir',
+        dest='media_dir', default=None, metavar='MEDIA_DIR',
+        help='set location of media files')
+    parser.add_option('-M', '--no-media',
+        action='store_false', dest='media', default=True,
+        help='do not process document media objects')
     parser.add_option('-n', '--dry-run',
         action='store_true', dest='dry_run', default=False,
         help='show what would have been done')
+    if hasattr(wordpresslib.WordPressClient, 'getPage'):
+        # We have patched wordpresslib module so enable --pages option.
+        parser.add_option('-p', '--pages',
+            action='store_true', dest='pages', default=False,
+            help='apply COMMAND to weblog pages')
+    parser.add_option('--post-id', type='int',
+        dest='post_id', default=None, metavar='POST_ID',
+        help='blog post ID number')
     parser.add_option('--proxy',
         dest='proxy', default=None, metavar='URL',
         help='set a proxy server')
+    parser.add_option('-t', '--title',
+        dest='title', default=None, metavar='TITLE',
+        help='set post TITLE')
+    parser.add_option('-u', '--unpublish',
+        action='store_true', dest='unpublish', default=False,
+        help='set post status to unpublished')
+    parser.add_option('-U', '--publish',
+        action='store_true', dest='publish', default=False,
+        help='set post status to published')
     parser.add_option('-v', '--verbose',
         action='store_true', dest='verbose', default=False,
         help='increase verbosity')

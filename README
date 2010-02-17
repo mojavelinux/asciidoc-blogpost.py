@@ -40,8 +40,8 @@ Current version tested under:
 - Xubuntu 8.04
 - Python 2.5.2
 
-Latest version in http://hg.sharesource.org/blogpost/[Mercurial
-repository at ShareSource].
+Latest version in http://code.google.com/p/blogpost/[Mercurial
+repository at Google Code].
 
 See also the http://srackham.wordpress.com/blogpost1/[blogpost(1) man
 page].
@@ -62,8 +62,8 @@ Prerequisites
 
 Installation
 ------------
-- Download from http://hg.sharesource.org/blogpost/[Mercurial
-  repository at ShareSource].
+- Clone the http://code.google.com/p/blogpost/[Mercurial repository at
+  Google Code] to your local machine.
 - Put `blogpost.py` in search path (optional).
 - Create `$HOME/.blogpost` configuration file (see example
   `conf/blogpost_example.conf`).

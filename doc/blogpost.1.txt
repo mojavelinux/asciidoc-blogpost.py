@@ -292,18 +292,18 @@ Create, list, update and delete a weblog post:
 
 RESOURCES
 ---------
-Project repository: http://hg.sharesource.org/blogpost/[]
+Mercurial repository: http://code.google.com/p/blogpost/
 
-Python WordPress library: http://www.blackbirdblog.it/programmazione/progetti/28[]
+Python WordPress library: http://www.blackbirdblog.it/programmazione/progetti/28
 
-AsciiDoc: http://www.methods.co.nz/asciidoc/[]
+AsciiDoc: http://www.methods.co.nz/asciidoc/
 
-WordPress.org: http://wordpress.org/[]
+WordPress.org: http://wordpress.org/
 
 
 AUTHOR
 ------
-Written by Stuart Rackham, <mailto:srackham@gmail.com[]>
+Written by Stuart Rackham, <srackham@gmail.com>
 
 
 COPYING

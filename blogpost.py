@@ -719,7 +719,7 @@ else:
         die('invalid DOCTYPE: %s' % OPTIONS.doctype)
     if OPTIONS.categories and \
             (command not in ('create','update','categories','post')
-             or (not blog_file or OPTIONS.post_id)):
+             or not (blog_file or OPTIONS.post_id)):
         die('--categories is not applicable')
     if command == 'categories' and blog_file and not OPTIONS.categories:
         die('missing --categories option')

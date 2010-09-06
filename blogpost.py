@@ -207,11 +207,15 @@ class Blogpost(object):
         asciidoc = asciidocapi.AsciiDocAPI()
         asciidoc.options('--no-header-footer')
         asciidoc.options('--doctype', self.doctype)
+        if OPTIONS.verbose > 1:
+            asciidoc.options('--verbose')
         outfile = StringIO.StringIO()
         asciidoc.execute(self.blog_file, outfile, backend='wordpress')
         result = outfile.getvalue()
         result = unicode(result,'utf8')
         self.content = StringIO.StringIO(result.encode('utf8'))
+        for s in asciidoc.messages:
+            infomsg('asciidoc: %s' % s)
 
     def sanitize_html(self):
         """
@@ -687,7 +691,7 @@ else:
         action='store_true', dest='publish', default=False,
         help='set post status to published')
     parser.add_option('-v', '--verbose',
-        action='store_true', dest='verbose', default=False,
+        action='count', dest='verbose', default=0,
         help='increase verbosity')
     if len(sys.argv) == 1:
         parser.parse_args(['--help'])

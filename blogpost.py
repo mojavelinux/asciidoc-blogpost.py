@@ -8,6 +8,10 @@ Email:     srackham@gmail.com
 
 """
 
+# Suppress warning: "the md5 module is deprecated; use hashlib instead"
+import warnings
+warnings.simplefilter('ignore',DeprecationWarning)
+
 import sys
 import os
 import time
@@ -22,7 +26,7 @@ import wordpresslib # http://www.blackbirdblog.it/programmazione/progetti/28
 import asciidocapi
 
 
-VERSION = '0.9.3'
+VERSION = '0.9.4'
 PROG = os.path.basename(os.path.splitext(__file__)[0])
 
 
@@ -134,8 +138,8 @@ class Cache(Namespace):
 
 class Blogpost(object):
 
-    # Valid AsciiDoc attribute blog parameter names (sans the 'blogpost-' prefix).
-    ATTRIBUTE_NAMES = ('categories','status','title','doctype','posttype')
+    # Valid blog parameter names.
+    PARAMETER_NAMES = ('categories','status','title','doctype','posttype')
 
     def __init__(self, server_url, username, password, options):
         # options contains the command-line options attributes.
@@ -157,7 +161,7 @@ class Blogpost(object):
         self.cache_file = None  # Cache file containing persistant blog data.
         self.media_dir = None
         self.content = None     # File-like object containing blog content.
-        self.attributes = {}    # AsciiDoc attribute parameter values.
+        self.parameters = {}    # AsciiDoc attribute parameter values.
         # XML-RPC server.
         self.server = None              # wordpresslib.WordPressClient.
         self.server_url = server_url    # WordPress XML-RPC server URL.
@@ -207,8 +211,13 @@ class Blogpost(object):
         asciidoc = asciidocapi.AsciiDocAPI()
         asciidoc.options('--no-header-footer')
         asciidoc.options('--doctype', self.doctype)
+        for attr in OPTIONS.attributes:
+            asciidoc.options('--attribute', attr)
+        if OPTIONS.asciidoc_conf:
+            asciidoc.options('--conf-file', OPTIONS.asciidoc_conf)
         if OPTIONS.verbose > 1:
             asciidoc.options('--verbose')
+        verbose('asciidoc: options: %r' % asciidoc.options.values)
         outfile = StringIO.StringIO()
         asciidoc.execute(self.blog_file, outfile, backend='wordpress')
         result = outfile.getvalue()
@@ -288,9 +297,9 @@ class Blogpost(object):
             if not self.options.dry_run:
                 os.unlink(self.cache_file)
 
-    def get_attributes(self):
+    def get_parameters(self):
         '''
-        Load blogpost attributes from AsciiDoc blogpost file.
+        Load blogpost parameters from AsciiDoc blogpost file.
         Check attribute value validity.
         '''
         def check_value(*valid_values):
@@ -309,8 +318,8 @@ class Blogpost(object):
             if mo:
                 name = mo.group('name')
                 value = mo.group('value').strip()
-                if name in self.ATTRIBUTE_NAMES:
-                    self.attributes[name] = value
+                if name in self.PARAMETER_NAMES:
+                    self.parameters[name] = value
                 else:
                     warning('%s: line %d: invalid attribute name: blogpost-%s' %
                             (os.path.basename(self.blog_file), lineno, name))
@@ -322,15 +331,15 @@ class Blogpost(object):
                     check_value('page','post')
             lineno += 1
 
-    def check_attributes(self):
+    def check_mandatory_parameters(self):
         '''
-        Check we have the attributes required by the --attributes option.
+        Check we have the parameters required by the --mandatory-parameters option.
         '''
-        if OPTIONS.attributes:
-            for name in OPTIONS.attributes.split(','):
-                if name not in self.ATTRIBUTE_NAMES:
-                    die('illegal --attributes name: %s' % name)
-                if name not in self.attributes:
+        if OPTIONS.mandatory_parameters:
+            for name in OPTIONS.mandatory_parameters.split(','):
+                if name not in self.PARAMETER_NAMES:
+                    die('illegal --mandatory-parameters name: %s' % name)
+                if name not in self.parameters:
                     die('%s: missing required attribute: blogpost-%s' %
                         (os.path.basename(self.blog_file), name))
 
@@ -643,9 +652,12 @@ else:
     parser = OptionParser(usage='usage: %prog [OPTIONS] COMMAND [BLOG_FILE]',
         version='%s %s' % (PROG,VERSION),
         description=description)
-    parser.add_option('-a', '--attributes',
-        dest='attributes', default='', metavar='ATTRIBUTES',
-        help='comma separated of list required attribute parameter names')
+    parser.add_option('-a', '--attribute',
+        action='append', dest='attributes', default=[], metavar='ATTRIBUTE',
+        help='set asciidoc attribute value')
+    parser.add_option('--asciidoc-conf',
+        dest='asciidoc_conf', default=None, metavar='ASCIIDOC_CONF_FILE',
+        help='asciidoc configuration file')
     parser.add_option('-c', '--categories',
         dest='categories', default='', metavar='CATEGORIES',
         help='comma separated list of post categories')
@@ -661,6 +673,9 @@ else:
     parser.add_option('--force-media',
         action='store_true', dest='force_media', default=False,
         help='force media files to upload')
+    parser.add_option('--mandatory-parameters',
+        dest='mandatory_parameters', default='', metavar='PARAMETERS',
+        help='comma separated list of required attribute parameter names')
     parser.add_option('--media-dir',
         dest='media_dir', default=None, metavar='MEDIA_DIR',
         help='set location of media files')
@@ -761,31 +776,31 @@ else:
             blog.media_dir = OPTIONS.media_dir
         blog.set_blog_file(blog_file)
         blog.load_cache()
-        blog.get_attributes()
-        blog.check_attributes()
-        blog.title = blog.attributes.get('title', blog.title)
+        blog.get_parameters()
+        blog.check_mandatory_parameters()
+        blog.title = blog.parameters.get('title', blog.title)
         if OPTIONS.title is not None:
             blog.title = OPTIONS.title
         if OPTIONS.post_id is not None:
             blog.id = OPTIONS.post_id
-        blog.post_type = blog.attributes.get('posttype', blog.post_type)
+        blog.post_type = blog.parameters.get('posttype', blog.post_type)
         if OPTIONS.pages:
             blog.post_type = 'page'
         if blog.post_type is None:
             blog.post_type = 'post'     # Default.
-        blog.status = blog.attributes.get('status', blog.status)
+        blog.status = blog.parameters.get('status', blog.status)
         if OPTIONS.publish:
             blog.status = 'published'
         if OPTIONS.unpublish:
             blog.status = 'unpublished'
         if blog.status is None:
             blog.status = 'published'   # Default.
-        blog.doctype = blog.attributes.get('doctype', blog.doctype)
+        blog.doctype = blog.parameters.get('doctype', blog.doctype)
         if OPTIONS.doctype is not None:
             blog.doctype = OPTIONS.doctype
         if blog.doctype is None:
             blog.doctype = 'article'    # Default.
-        OPTIONS.categories = blog.attributes.get('categories', OPTIONS.categories)
+        OPTIONS.categories = blog.parameters.get('categories', OPTIONS.categories)
         # Handle commands.
         if command == 'info':
             if not os.path.isfile(blog.cache_file):

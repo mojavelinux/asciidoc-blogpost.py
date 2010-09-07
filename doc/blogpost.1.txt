@@ -56,12 +56,15 @@ COMMANDS
 
 OPTIONS
 -------
-*-a, --attributes*='ATTRIBUTES'::
-  Specifies a comma separated list of one or more weblog parameters
-  that must be defined in the 'BLOG_FILE'. If this option is not
-  present then 'BLOG_FILE' attribute parameter definitions are
-  optional.
-  See the <<X3,ATTRIBUTE PARAMETERS section>>.
+*-a, --attribute*='ATTRIBUTE'::
+  Set asciidoc(1) attribute value.
+  Identical to 'asciidoc(1)' *--attribute* option.
+  This option may be specified more than once.
+  Applicable to 'post' command.
+
+*--asciidoc-conf*='ASCIIDOC_CONF_FILE'::
+  Use 'asciidoc(1)' configuration file 'ASCIIDOC_CONF_FILE'.
+  Same as asciidoc(1) *--conf-file* option.
   Applicable to 'post' command.
 
 *-c, --categories*='CATEGORIES'::
@@ -83,8 +86,8 @@ OPTIONS
   Applicable to 'post' command.
 
 *-f, --conf-file*='CONF_FILE'::
-  Use configuration file 'CONF_FILE'. This file is read after the
-  (optional) implicit '$HOME/.blogpost' configuration file.
+  Use blogpost configuration file 'CONF_FILE'. This file is read after
+  the (optional) implicit '$HOME/.blogpost' configuration file.
 
 *--force*::
   Force blog file to upload even if it has not been modified since the
@@ -96,6 +99,14 @@ OPTIONS
 
 *-h, --help*::
   Show this help message and exit.
+
+*--mandatory-parameters*='PARAMETERS'::
+  Specifies a comma separated list of one or more weblog parameters
+  that must be defined in the 'BLOG_FILE'. If this option is not
+  present then 'BLOG_FILE' attribute parameter definitions are
+  optional.
+  See the <<X3,ATTRIBUTE PARAMETERS section>>.
+  Applicable to 'post' command.
 
 *--media-dir=MEDIA_DIR*::
   The name of the directory containing those media files that have
@@ -180,10 +191,10 @@ corresponding AsciiDoc attribute name. Examples:
   :blogpost-status: published 
   :blogpost-categories: blogpost,AsciiDoc,Weblog client,WordPress
 
-The '--attributes' option is used to make selected 'BLOG_FILE'
-attribute entries mandatory. Example:
+The '--mandatory-parameters' option is used to make selected
+'BLOG_FILE' attribute entries mandatory. Example:
 
-  --attributes=status,categories
+  --mandatory-parameters=status,categories
 
 Parameter precedence is (from highest to lowest):
 

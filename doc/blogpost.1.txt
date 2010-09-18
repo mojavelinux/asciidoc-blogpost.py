@@ -62,10 +62,9 @@ OPTIONS
   This option may be specified more than once.
   Applicable to 'post' command.
 
-*--asciidoc-conf*='ASCIIDOC_CONF_FILE'::
-  Use 'asciidoc(1)' configuration file 'ASCIIDOC_CONF_FILE'.
-  Same as asciidoc(1) *--conf-file* option.
-  Applicable to 'post' command.
+*--asciidoc-opt*='ASCIIDOC_OPT'::
+  A single 'asciidoc(1)' option.
+  This option may be specified more than once.
 
 *-c, --categories*='CATEGORIES'::
   A comma separated list of categories that will be assigned to the

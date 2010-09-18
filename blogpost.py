@@ -213,8 +213,19 @@ class Blogpost(object):
         asciidoc.options('--doctype', self.doctype)
         for attr in OPTIONS.attributes:
             asciidoc.options('--attribute', attr)
-        if OPTIONS.asciidoc_conf:
-            asciidoc.options('--conf-file', OPTIONS.asciidoc_conf)
+        for opt in OPTIONS.asciidoc_opts:
+            print '%r' % opt
+            opt = opt.partition(' ')
+            if opt[2]:
+                s = opt[2]
+                s = s.strip()
+                if (s.startswith('"') and s.endswith('"')
+                        or s.startswith("'") and s.endswith("'")):
+                    # Strip quotes.
+                    s = s[1:-1]
+                asciidoc.options(opt[0], s)
+            else:
+                asciidoc.options(opt[0])
         if OPTIONS.verbose > 1:
             asciidoc.options('--verbose')
         verbose('asciidoc: options: %r' % asciidoc.options.values)
@@ -655,9 +666,9 @@ else:
     parser.add_option('-a', '--attribute',
         action='append', dest='attributes', default=[], metavar='ATTRIBUTE',
         help='set asciidoc attribute value')
-    parser.add_option('--asciidoc-conf',
-        dest='asciidoc_conf', default=None, metavar='ASCIIDOC_CONF_FILE',
-        help='asciidoc configuration file')
+    parser.add_option('--asciidoc-opt',
+        action='append',dest='asciidoc_opts', default=[],
+        metavar='ASCIIDOC_OPTION', help='set asciidoc command option')
     parser.add_option('-c', '--categories',
         dest='categories', default='', metavar='CATEGORIES',
         help='comma separated list of post categories')

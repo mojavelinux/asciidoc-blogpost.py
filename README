@@ -3,6 +3,10 @@ blogpost README
 :Author: Stuart Rackham
 
 
+*Published*: 2008-05-16 +
+*Updated*: 2010-02-17 +
+*Updated*: 2010-10-28
+
 'blogpost' is a Wordpress command-line weblog client.  It creates and
 updates weblog entries directly from
 http://www.methods.co.nz/asciidoc/[AsciiDoc] (or HTML) source
@@ -17,7 +21,7 @@ This 'blogpost' command creates a blogpost containing images from an
 AsciiDoc text file:
 
 ---------------------------------------------------------------------
-$ blogpost.py create blogpost_media_processing.txt
+$ blogpost.py post blogpost_media_processing.txt
 
 uploading: /home/srackham/doc/blogs/smallnew.png...
 url: http://srackham.files.wordpress.com/2008/05/smallnew.png
@@ -31,20 +35,16 @@ url: http://srackham.wordpress.com/2008/05/22/blogpost-media-processing/
 
 Status
 ------
-This release is probably beta quality i.e. works for me but has not
-had a lot of testing and has only been briefly tested under MS
-Windows.
-
-Current version tested under:
-
-- Xubuntu 8.04
-- Python 2.5.2
-
 Latest version in http://code.google.com/p/blogpost/[Mercurial
 repository at Google Code].
 
 See also the http://srackham.wordpress.com/blogpost1/[blogpost(1) man
 page].
+
+Current version tested under:
+
+- Xubuntu 10.04
+- Python 2.6.5
 
 'blogpost' uses Michele Ferretti’s
 http://www.blackbirdblog.it/programmazione/progetti/28[Python
@@ -85,6 +85,7 @@ it `wordpress.conf`.
 
 =====================================================================
 
+
 Bugs
 ----
 - Under some circumstances WordPress converts three periods to an
@@ -95,3 +96,7 @@ Bugs
   default theme).
 - WordPress nested unordered lists all have the same bullet style
   (WordPress default theme).
+- Large posts can result in blank WordPress pages (I experienced this
+  posting the AsciiDoc User Guide which is over five thousand lines
+  long). The problem seems to be with WordPress:
+  http://www.undermyhat.org/blog/2009/07/sudden-empty-blank-page-for-large-posts-with-wordpress/

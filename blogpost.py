@@ -203,6 +203,8 @@ class Blogpost(object):
             else:
                 die('unable to find document title in %s' % self.blog_file)
             self.title = line.strip()
+            if self.title.startswith('= '):
+                self.title = line[2:].strip()
 
     def asciidoc2html(self):
         """

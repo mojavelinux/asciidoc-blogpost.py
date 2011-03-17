@@ -213,6 +213,7 @@ class Blogpost(object):
         asciidoc = asciidocapi.AsciiDocAPI()
         asciidoc.options('--no-header-footer')
         asciidoc.options('--doctype', self.doctype)
+        asciidoc.options('--attribute', 'blogpost')
         for attr in OPTIONS.attributes:
             asciidoc.options('--attribute', attr)
         for opt in OPTIONS.asciidoc_opts:

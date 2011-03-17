@@ -224,6 +224,9 @@ Weblog title (see '--title' option).
 
 |====================================================================
 
+'blogpost(1)' automatically creates the 'blogpost' attribute which is
+useful for conditionally processing AsciiDoc document content.
+
 
 [[X1]]
 METADATA CACHING

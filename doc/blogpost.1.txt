@@ -1,11 +1,12 @@
 BLOGPOST(1)
 ===========
 Stuart Rackham
+:doctype: manpage
 
 
 NAME
 ----
-blogpost - WordPress weblog client
+blogpost - WordPress blog client
 
 
 SYNOPSIS
@@ -15,14 +16,14 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-A WordPress command-line weblog. It creates and updates weblog entries
-directly from AsciiDoc (or HTML) source documents. You can also delete
-and list weblog entries from the command-line.
+A WordPress command-line blog client. It creates and updates blog
+entries directly from AsciiDoc (or HTML) source documents. You can
+also delete and list blog entries from the command-line.
 
 - Manages WordPress Posts and Pages.
 - Automatically uploads media files (images, video, audio).
 - Only posts new or modified content and media files.
-- Manages WordPress weblog categories.
+- Manages WordPress blog categories.
 
 
 COMMANDS
@@ -30,26 +31,26 @@ COMMANDS
 *cat, categories*::
   Specify the '--categories' option and either a 'BLOG_FILE' or a
   '--post-id' to set the post's categories.  If the '--categories'
-  option is not specified then all weblog categories for all posts are
+  option is not specified then all blog categories for all posts are
   listed.
 
 *d, delete*::
-  Delete weblog post. Deletes the 'BLOG_FILE' blogpost cache
+  Delete blog post. Deletes the 'BLOG_FILE' blogpost cache
   file but not the 'BLOG_FILE'.
 
 *dump*::
   Convert the AsciiDoc 'BLOG_FILE' to HTML and print on 'stdout'.
 
 *i, info*::
-  Print weblog post information. Information is sourced from the
+  Print blog post information. Information is sourced from the
   client-side 'BLOG_FILE' blogpost cache file.
 
 *l, list*::
-  List recent weblog Posts. Information is sourced directly from
+  List recent blog Posts. Information is sourced directly from
   WordPress server. Use the '--pages' option to list published Pages.
 
 *p, post*::
-  Post the 'BLOG_FILE' to the weblog. If this is the first time the
+  Post the 'BLOG_FILE' to the blog. If this is the first time the
   'BLOG_FILE' has been posted a new post is created, otherwise the
   existing post is updated.
 
@@ -68,7 +69,7 @@ OPTIONS
 
 *-c, --categories*='CATEGORIES'::
   A comma separated list of categories that will be assigned to the
-  weblog post. Prefixing 'CATEGORIES' with a plus or minus character
+  blog post. Prefixing 'CATEGORIES' with a plus or minus character
   adds or removes the categories from an existing post. Category names
   are case insensitive. If an assigned category does not already exist
   it will be created.
@@ -100,7 +101,7 @@ OPTIONS
   Show this help message and exit.
 
 *--mandatory-parameters*='PARAMETERS'::
-  Specifies a comma separated list of one or more weblog parameters
+  Specifies a comma separated list of one or more blog parameters
   that must be defined in the 'BLOG_FILE'. If this option is not
   present then 'BLOG_FILE' attribute parameter definitions are
   optional.
@@ -122,11 +123,11 @@ OPTIONS
   what would have been done.
 
 *-p, --pages*::
-  Apply 'COMMAND' to weblog 'Pages' rather than normal weblog 'Posts'.
+  Apply 'COMMAND' to blog 'Pages' rather than normal blog 'Posts'.
   Applicable to 'delete', 'list' and 'post' commands.
 
 *--post-id*='POST_ID'::
-  Explicitly specify the weblog post ID number. This option will only
+  Explicitly specify the blog post ID number. This option will only
   be necessary when there is no client-side 'BLOG_FILE' cache file.
   Applies to 'delete' and 'update' commands.
 
@@ -134,18 +135,18 @@ OPTIONS
   Send WordPress XML-RPC via proxy server 'URL'.
 
 *-t, --title*='TITLE'::
-  Set the weblog post title. If this option is omitted and the
+  Set the blog post title. If this option is omitted and the
   'blogpost-title' attribute is not defined in the 'BLOG_FILE' and the
   title is not in the cache file then the AsciiDoc 'BLOG_FILE' title is
   used.
   Applicable to 'post' command.
 
 *-u, --unpublish*::
-  Set weblog post status to 'unpublished'.
+  Set blog post status to 'unpublished'.
   Applicable to 'post' command.
 
 *-U, --publish*::
-  Set weblog post status to 'published'.
+  Set blog post status to 'published'.
   Applicable to 'post' command.
 
 *-v, --verbose*::
@@ -159,7 +160,7 @@ OPTIONS
 'blogpost' saves the values set by the following options in the
 'BLOG_FILE' blogpost cache file: '--doctype', '--doctype', '--pages',
 '--post-id', '--publish', '--unpublish' and '--title'.  This means
-that once a weblog post has been created you won't need to use them in
+that once a blog post has been created you won't need to use them in
 subsequent commands unless you decide to change them.
 
 
@@ -181,14 +182,14 @@ the blog file using the AsciiDoc block passthrugh macro:
 [[X3]]
 ATTRIBUTE PARAMETERS
 --------------------
-Blogpost allows the following weblog parameters to be defined inside
+Blogpost allows the following blog parameters to be defined inside
 an AsciiDoc 'BLOG_FILE': *categories*, *status*, *title*, *doctype*,
 *posttype*.  The parameters are defined using AsciiDoc attribute
 entries -- the parameter name, prefixed with *blogpost-*, forms the
 corresponding AsciiDoc attribute name. Examples:
 
   :blogpost-status: published 
-  :blogpost-categories: blogpost,AsciiDoc,Weblog client,WordPress
+  :blogpost-categories: blogpost,AsciiDoc,Blog client,WordPress
 
 The '--mandatory-parameters' option is used to make selected
 'BLOG_FILE' attribute entries mandatory. Example:
@@ -203,10 +204,10 @@ Parameter precedence is (from highest to lowest):
 
 [options="header"]
 |====================================================================
-|Weblog parameter name |AsciiDoc attribute name |Allowed values
+|Blog parameter name |AsciiDoc attribute name |Allowed values
 
 |categories |blogpost-categories |
-Comma separated list of weblog category names (see '--categories'
+Comma separated list of blog category names (see '--categories'
 option).
 
 |doctype |blogpost-doctype |
@@ -220,7 +221,7 @@ option).
 options).
 
 |title |blogpost-title |
-Weblog title (see '--title' option).
+Blog title (see '--title' option).
 
 |====================================================================
 
@@ -250,10 +251,10 @@ are uploaded to the WordPress server.  Because the caching is on a
 per-document basis, media files are not shared between documents.
 
 In addition to storing media metadata, blogpost cache files also store
-the weblog post ID, URL, title, creation and update timestamps along
+the blog post ID, URL, title, creation and update timestamps along
 with the last used value of many of the 'blogpost' command options.
-This is very handy, it means you don't have to remember the weblog
-post ID or the options you used to create the weblog when you rerun
+This is very handy, it means you don't have to remember the blog
+post ID or the options you used to create the blog when you rerun
 the 'post' command.
 
 
@@ -294,7 +295,7 @@ http://codex.wordpress.org/Pages[] for a detailed explanation.
 
 EXAMPLES
 --------
-Create, list, update and delete a weblog post:
+Create, list, update and delete a blog post:
 
   blogpost.py post blogging_with_asciidoc.txt
   blogpost.py info blogging_with_asciidoc.txt

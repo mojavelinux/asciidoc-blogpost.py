@@ -249,7 +249,14 @@ class Blogpost(object):
         result = ''
         for line in self.content:
             if line.startswith('<pre'):
+                line = ' ' + line
                 while '</pre>' not in line:
+                    result += line
+                    line = self.content.next()
+                result += line
+            elif line.startswith('src="data:'):
+                line = ' ' + line
+                while not line.strip().endswith('">'):
                     result += line
                     line = self.content.next()
                 result += line
@@ -381,10 +388,12 @@ class Blogpost(object):
         rexp = re.compile(r'(?i)<(?P<tag>(a\b[^>]* href)|(img\b[^>]* src))="(?P<src>.+?)"')
         for line in self.content:
             lineout = ''
-            mo = rexp.search(line)
-            while mo:
+            while True:
+                mo = rexp.search(line)
+                if not mo: break
                 tag = mo.group('tag')
                 src = mo.group('src')
+                if src.startswith('data:'): continue    # Skip embedded images.
                 url = src
                 if os.path.splitext(src)[1][1:].lower() in media_exts:
                     media_obj = self.media.get(src)
@@ -404,7 +413,6 @@ class Blogpost(object):
                         self.updated_at = int(time.time())
                 lineout += line[:mo.start()] + ('<%s="%s"' % (tag, url))
                 line = line[mo.end():]
-                mo = rexp.search(line)
             lineout += line
             result.write(lineout)
         result.seek(0)

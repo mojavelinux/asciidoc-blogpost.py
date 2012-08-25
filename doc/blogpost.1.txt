@@ -191,6 +191,9 @@ corresponding AsciiDoc attribute name. Examples:
   :blogpost-status: published 
   :blogpost-categories: blogpost,AsciiDoc,Blog client,WordPress
 
+NOTE: Blogpost attribute entry values are not subject to the usual
+AsciiDoc attribute substitution.
+
 The '--mandatory-parameters' option is used to make selected
 'BLOG_FILE' attribute entries mandatory. Example:
 

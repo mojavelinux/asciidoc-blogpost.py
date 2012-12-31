@@ -44,8 +44,8 @@ page].
 
 Current version tested under:
 
-- Xubuntu 10.04
-- Python 2.6.5
+- Xubuntu 12.04
+- Python 2.7.3
 
 'blogpost' uses Michele Ferretti’s
 http://www.blackbirdblog.it/programmazione/progetti/28[Python
@@ -68,7 +68,7 @@ Installation
 - Put `blogpost.py` in search path (optional).
 - Install the Wordpress backend plugin:
 
-  asciidoc --backend install conf/wordpress.zip
+  asciidoc --backend install ./conf/wordpress.zip
 
 - Create `$HOME/.blogpost` configuration file (see example
   `conf/blogpost_example.conf`).

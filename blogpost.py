@@ -26,7 +26,7 @@ import wordpresslib # http://www.blackbirdblog.it/programmazione/progetti/28
 import asciidocapi
 
 
-VERSION = '0.9.4'
+VERSION = '0.9.5'
 PROG = os.path.basename(os.path.splitext(__file__)[0])
 
 

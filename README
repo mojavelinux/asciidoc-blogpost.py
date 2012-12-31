@@ -3,9 +3,10 @@ blogpost README
 :Author: Stuart Rackham
 
 
-*Published*: 2008-05-16 +
+*Updated*: 2012-12-31 +
+*Updated*: 2010-10-28 +
 *Updated*: 2010-02-17 +
-*Updated*: 2010-10-28
+*Published*: 2008-05-16
 
 'blogpost' is a Wordpress command-line weblog client.  It creates and
 updates weblog entries directly from
@@ -65,6 +66,10 @@ Installation
 - Clone the http://code.google.com/p/blogpost/[Mercurial repository at
   Google Code] to your local machine.
 - Put `blogpost.py` in search path (optional).
+- Install the Wordpress backend plugin:
+
+  asciidoc --backend install conf/wordpress.zip
+
 - Create `$HOME/.blogpost` configuration file (see example
   `conf/blogpost_example.conf`).
 - Disable 'emoticons' from the Wordpress browser interface (optional):
@@ -74,14 +79,12 @@ Installation
      option stops the automatic conversion of text patterns to
      emoticons).
 
-[IMPORTANT]
+[NOTE]
 =====================================================================
-As of AsciiDoc 8.3.0 the 'wordpress' backend conf file has been
-included in the AsciiDoc distribution. If you are using a verison of
-AsciiDoc prior to 8.3.0 you need to install and use the old conf file
--- copy the `conf/wordpress-8.2.7.conf` to the AsciiDoc install,
-global configuration or user (`$HOME/.asciidoc`) directory and rename
-it `wordpress.conf`.
+As of AsciiDoc 8.6.9 the 'wordpress' backend conf file
+`wordpress.conf` is no longer included in the AsciiDoc distribution --
+it's included here in the blogpost distribution as a backend plugin
+(`conf/wordpress.zip`).
 
 =====================================================================
 

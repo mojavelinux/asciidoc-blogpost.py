@@ -17,8 +17,8 @@ SYNOPSIS
 DESCRIPTION
 -----------
 A WordPress command-line blog client. It creates and updates blog
-entries directly from AsciiDoc (or HTML) source documents. You can
-also delete and list blog entries from the command-line.
+entries directly from AsciiDoc, Rimu Markup or HTML source documents.
+You can also delete and list blog entries from the command-line.
 
 - Manages WordPress Posts and Pages.
 - Automatically uploads media files (images, video, audio).
@@ -39,7 +39,7 @@ COMMANDS
   file but not the 'BLOG_FILE'.
 
 *dump*::
-  Convert the AsciiDoc 'BLOG_FILE' to HTML and print on 'stdout'.
+  Convert the 'BLOG_FILE' to HTML and print on 'stdout'.
 
 *i, info*::
   Print blog post information. Information is sourced from the
@@ -76,14 +76,9 @@ OPTIONS
   Applicable to 'categories' and 'post' commands.
 
 *-d, --doctype*='DOCTYPE'::
-  Specifies the type of 'BLOG_FILE'. Allowed values are 'html'
-  (WordPress compatible HTML file) or an AsciiDoc document type
-  ('article', 'book' or 'manpage'). Default document type is
-  'article'. If you use the 'html' doctype be aware that WordPress
-  does not handle all HTML tags, this is not an issue with the
-  AsciiDoc doctype values because AsciiDoc generates WordPress
-  friendly HTML.
-  Applicable to 'post' command.
+  Specifies the type of AsciiDoc 'BLOG_FILE'. Allowed values are
+  AsciiDoc document types: 'article', 'book' or 'manpage'. The default
+  document type is 'article'.
 
 *-f, --conf-file*='CONF_FILE'::
   Use blogpost configuration file 'CONF_FILE'. This file is read after
@@ -135,10 +130,7 @@ OPTIONS
   Send WordPress XML-RPC via proxy server 'URL'.
 
 *-t, --title*='TITLE'::
-  Set the blog post title. If this option is omitted and the
-  'blogpost-title' attribute is not defined in the 'BLOG_FILE' and the
-  title is not in the cache file then the AsciiDoc 'BLOG_FILE' title is
-  used.
+  Set the blog post title.
   Applicable to 'post' command.
 
 *-u, --unpublish*::
@@ -167,32 +159,52 @@ subsequent commands unless you decide to change them.
 [[X2]]
 BLOG FILE
 ---------
-The 'BLOG_FILE' is an http://www.methods.co.nz/asciidoc/[AsciiDoc]
-formatted text file.  'blogpost(1)' uses 'asciidoc(1)' to convert the
-blog file to WordPress compatible HTML. If the '--doctype=html' then
-the AsciiDoc conversion is skipped.
+The 'BLOG_FILE' is either an
+http://www.methods.co.nz/asciidoc/[AsciiDoc] formatted text file; a
+http://rimumarkup.org/[Rimu Markup] text file or an HTML file.
+'blogpost(1)' uses 'asciidoc(1)' and 'rimuc(1)' commands to convert
+AsciiDoc and Rimu Markup blog files to WordPress compatible HTML.
+
+Rimu Markup files must have a '.rmu' file name extension; HTML files
+must have a '.html' or '.htm' extension; all other files are assumed
+to be AsciiDoc formatted.
 
 You can insert a WordPress
 http://support.wordpress.com/splitting-content/more-tag/[more tag] in
-the blog file using the AsciiDoc block passthrugh macro:
+an AsciiDoc blog file using the AsciiDoc block passthrugh macro:
 
   pass::[<!--more-->]
+
+You can put the 'more' tag in a Rimu Markup blog file verbatim:
+
+  <!--more-->
+
+Be aware that WordPress does not handle all HTML tags, this is not an
+issue with the AsciiDoc or Rimu Markup blog files because the
+generated HTML is WordPress friendly.
 
 
 [[X3]]
 ATTRIBUTE PARAMETERS
 --------------------
-Blogpost allows the following blog parameters to be defined inside
-an AsciiDoc 'BLOG_FILE': *categories*, *status*, *title*, *doctype*,
-*posttype*.  The parameters are defined using AsciiDoc attribute
-entries -- the parameter name, prefixed with *blogpost-*, forms the
-corresponding AsciiDoc attribute name. Examples:
+Blogpost allows the following blog parameters to be defined inside an
+AsciiDoc or Rimu Markup 'BLOG_FILE': *categories*, *status*, *title*,
+*doctype*, *posttype*.  The parameters are defined using AsciiDoc
+attribute entries or Rimu Markup macro definitions -- the parameter
+name is prefixed with *blogpost-*.
+
+AsciiDoc examples:
 
   :blogpost-status: published 
   :blogpost-categories: blogpost,AsciiDoc,Blog client,WordPress
 
 NOTE: Blogpost attribute entry values are not subject to the usual
 AsciiDoc attribute substitution.
+
+Equivalent Rimu Markup macro definitions:
+
+  {blogpost-status} = 'published '
+  {blogpost-categories} = 'blogpost,AsciiDoc,Blog client,WordPress'
 
 The '--mandatory-parameters' option is used to make selected
 'BLOG_FILE' attribute entries mandatory. Example:
@@ -202,12 +214,12 @@ The '--mandatory-parameters' option is used to make selected
 Parameter precedence is (from highest to lowest):
 
 1. Command-line options.
-2. AsciiDoc attribute entries.
+2. 'BLOG_FILE' entries.
 3. Blogpost cache.
 
 [options="header"]
 |====================================================================
-|Blog parameter name |AsciiDoc attribute name |Allowed values
+|Blog parameter name |Attribute name |Allowed values
 
 |categories |blogpost-categories |
 Comma separated list of blog category names (see '--categories'
@@ -228,8 +240,13 @@ Blog title (see '--title' option).
 
 |====================================================================
 
-'blogpost(1)' automatically creates the 'blogpost' attribute which is
-useful for conditionally processing AsciiDoc document content.
+'blogpost(1)' automatically creates the 'blogpost' AsciiDoc attribute
+which is useful for conditionally processing AsciiDoc document
+content.
+
+'blogpost(1)' automatically uses the AsciiDoc title if neither the
+'--title' option or the 'blogpost-title' attribute is defined and the
+title is not in the cache file.
 
 
 [[X1]]
@@ -317,6 +334,8 @@ AsciiDoc: http://www.methods.co.nz/asciidoc/
 
 WordPress.org: http://wordpress.org/
 
+Rimu Markup: http://rimumarkup.org/
+
 
 AUTHOR
 ------
@@ -325,6 +344,6 @@ Written by Stuart Rackham, <srackham@gmail.com>
 
 COPYING
 -------
-Copyright \(C) 2008-2010 Stuart Rackham. Free use of this software is
+Copyright \(C) 2008-2013 Stuart Rackham. Free use of this software is
 granted under the terms of the MIT License.
 

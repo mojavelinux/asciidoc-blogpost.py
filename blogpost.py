@@ -21,6 +21,7 @@ import xmlrpclib
 import pickle
 import md5
 import calendar
+import subprocess
 
 import wordpresslib # http://www.blackbirdblog.it/programmazione/progetti/28
 import asciidocapi
@@ -89,6 +90,28 @@ def load_conf(conf_file):
     """
     execfile(conf_file, globals())
 
+def shell(cmd):
+    '''
+    Execute command cmd in shell and return tuple
+    (stdoutdata, stderrdata, returncode).
+    An error terminates the application.
+    '''
+    verbose('executing: %s' % cmd)
+#    if OPTIONS.dry_run:
+#        return
+    stdout = stderr = subprocess.PIPE
+    try:
+        popen = subprocess.Popen(cmd, stdout=stdout, stderr=stderr, shell=True)
+    except OSError, e:
+        die('failed: %s: %s' % (cmd, e))
+    stdoutdata, stderrdata = popen.communicate()
+    if OPTIONS.verbose:
+        print stdoutdata
+        print stderrdata
+    if popen.returncode != 0:
+        die('%s returned non-zero exit status %d' % (cmd, popen.returncode))
+    return (stdoutdata, stderrdata, popen.returncode)
+
 
 ###########
 # Globals #
@@ -150,7 +173,8 @@ class Blogpost(object):
         self.title = None
         self.status = None  # Publication status ('published','unpublished').
         self.post_type = None   # 'post' or 'page'.
-        self.doctype = None     # 'article','book','manpage' or 'html'.
+        # DEPRECATED: doctype 'html'
+        self.doctype = None     # AsciiDoc doctype: 'article','book', 'manpage'.
         self.created_at = None  # Seconds since epoch in UTC.
         self.updated_at = None  # Seconds since epoch in UTC.
         self.media = {}  # Contains Media objects keyed by document src path.
@@ -173,8 +197,13 @@ class Blogpost(object):
             self.server_url, self.username, self.password, self.options.proxy)
         self.server.selectBlog(0)
 
-    def is_html(self):
-        return self.doctype == 'html'
+    def docformat(self):
+        if os.path.splitext(self.blog_file)[1].lower() in ('.htm','.html'):
+            return 'html'
+        elif os.path.splitext(self.blog_file)[1].lower() == '.rmu':
+            return 'rimu'
+        else:
+            return 'asciidoc'
 
     def is_page(self):
         return self.post_type == 'page'
@@ -191,20 +220,19 @@ class Blogpost(object):
 
     def set_title_from_blog_file(self):
         """
-        Set title attribute from title in blog file.
+        Set title attribute from title in AsciiDoc blog file.
         """
-        if not self.is_html():
-            # AsciiDoc blog file.
-            #TODO: Skip leading comment blocks.
-            for line in open(self.blog_file):
-                # Skip blank lines and comment lines.
-                if not re.match(r'(^//)|(^\s*$)', line):
-                    break
-            else:
-                die('unable to find document title in %s' % self.blog_file)
-            self.title = line.strip()
-            if self.title.startswith('= '):
-                self.title = line[2:].strip()
+        assert self.docformat() == 'asciidoc'
+        #TODO: Skip leading comment blocks.
+        for line in open(self.blog_file):
+            # Skip blank lines and comment lines.
+            if not re.match(r'(^//)|(^\s*$)', line):
+                break
+        else:
+            die('unable to find document title in %s' % self.blog_file)
+        self.title = line.strip()
+        if self.title.startswith('= '):
+            self.title = line[2:].strip()
 
     def asciidoc2html(self):
         """
@@ -239,6 +267,10 @@ class Blogpost(object):
         self.content = StringIO.StringIO(result.encode('utf8'))
         for s in asciidoc.messages:
             infomsg('asciidoc: %s' % s)
+
+    def rimu2html(self):
+        html = shell('rimuc "%s"' % self.blog_file)[0]
+        self.content = StringIO.StringIO(html)
 
     def sanitize_html(self):
         """
@@ -277,6 +309,9 @@ class Blogpost(object):
             self.status = cache.status
             self.post_type = cache.post_type
             self.doctype = cache.doctype
+            # DEPRECATED: doctype 'html'
+            if self.doctype == 'html':
+                self.doctype = 'article'
             self.created_at = cache.created_at
             self.updated_at = cache.updated_at
             self.media = cache.media
@@ -320,7 +355,7 @@ class Blogpost(object):
 
     def get_parameters(self):
         '''
-        Load blogpost parameters from AsciiDoc blogpost file.
+        Load blogpost parameters from AsciiDoc or Rimu blogpost file.
         Check attribute value validity.
         '''
         def check_value(*valid_values):
@@ -328,11 +363,12 @@ class Blogpost(object):
                 die('%s: line %d: invalid attribute value: blogpost-%s: %s' %
                     (os.path.basename(self.blog_file), lineno, name, value))
 
-        if self.blog_file is None:
+        if self.blog_file is None or self.docformat() == 'html':
             return
-        if os.path.splitext(self.blog_file)[1].lower() in ('.htm','.html'):
-            return
-        reo = re.compile(r':blogpost-(?P<name>[-\w]+):\s+(?P<value>.*)')
+        if self.docformat() == 'rimu':
+            reo = re.compile(r"^\{blogpost-(?P<name>[-\w]+)\}\s*=\s*'(?P<value>.*)'$")
+        else:
+            reo = re.compile(r':blogpost-(?P<name>[-\w]+):\s+(?P<value>.*)')
         lineno = 1
         for line in open(self.blog_file):
             mo = re.match(reo, line)
@@ -508,15 +544,16 @@ class Blogpost(object):
         self.post()
 
     def dump(self):
-        self.asciidoc2html()
+        if self.docformat() == 'rimu':
+            self.rimu2html()
+        else:
+            self.asciidoc2html()
         print self.content.read()
 
     def post(self):
         """
         Update an existing Wordpress post if post_id is not None,
         else create a new post.
-        The blog_file can be either an AsciiDoc file or an
-        HTML file (self.doctype == True).
         """
         # Create wordpresslib.WordPressPost object.
         if self.id is not None:
@@ -525,16 +562,17 @@ class Blogpost(object):
             post = wordpresslib.WordPressPost()
         # Set post title.
         if not self.title:
-            if self.is_html():
+            if self.docformat() ('html', 'rimu'):
                 die('missing title: use --title option')
             else:
-                # AsciiDoc blog file.
                 self.set_title_from_blog_file()
         post.title = self.title
         assert(self.title)
         # Generate blog content from blog file.
-        if self.is_html():
+        if self.docformat() == 'html':
             self.content = open(self.blog_file)
+        elif self.docformat() == 'rimu':
+            self.rimu2html()
         else:
             self.asciidoc2html()
         # Conditionally upload media files.
@@ -756,6 +794,7 @@ else:
         if not os.path.isfile(blog_file):
             die('missing BLOG_FILE: %s' % blog_file)
         blog_file = os.path.abspath(blog_file)
+    # DEPRECATED: doctype 'html'.
     if OPTIONS.doctype not in (None,'article','book','manpage','html'):
         die('invalid DOCTYPE: %s' % OPTIONS.doctype)
     if OPTIONS.categories and \

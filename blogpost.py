@@ -279,8 +279,14 @@ class Blogpost(object):
         <pre></pre> blocks.
         """
         result = ''
+        firstline = True
         for line in self.content:
-            if line.startswith('<pre'):
+            if firstline and line.startswith('<h1>'):
+                # Drop the h1 header at the start of the document because
+                # Wordpress generates its own post title.
+                # This applies to Rimu generated documents.
+                pass
+            elif line.startswith('<pre'):
                 line = ' ' + line
                 while '</pre>' not in line:
                     result += line
@@ -294,6 +300,7 @@ class Blogpost(object):
                 result += line
             else:
                 result += ' ' + line.strip()
+            if firstline: firstline = False
         self.content = StringIO.StringIO(result)
 
     def load_cache(self):

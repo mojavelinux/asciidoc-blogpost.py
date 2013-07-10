@@ -289,8 +289,8 @@ class Blogpost(object):
         result = ''
         firstline = True
         for line in self.content:
-            if firstline and line.startswith('<h1>'):
-                # Drop the h1 header at the start of the document because
+            if firstline and line and re.match(r'^<h1>.*</h1>$', line):
+                # If the first line is an h1 header drop it because
                 # Wordpress generates its own post title.
                 # This applies to Rimu generated documents.
                 pass

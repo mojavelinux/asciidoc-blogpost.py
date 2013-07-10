@@ -222,17 +222,25 @@ class Blogpost(object):
         """
         Set title attribute from title in AsciiDoc blog file.
         """
-        assert self.docformat() == 'asciidoc'
-        #TODO: Skip leading comment blocks.
-        for line in open(self.blog_file):
-            # Skip blank lines and comment lines.
-            if not re.match(r'(^//)|(^\s*$)', line):
+        if self.docformat() == 'html':
+            # Cannot reliably search adhoc HTML source for title.
+            return
+        if self.docformat() == 'rimu':
+            for line in self.content:
+                # Look for h1 title in first line.
+                mo = re.match(r'<h1>(.+)</h1>', line)
+                if mo:
+                    self.title = mo.group(1)
                 break
-        else:
-            die('unable to find document title in %s' % self.blog_file)
-        self.title = line.strip()
-        if self.title.startswith('= '):
-            self.title = line[2:].strip()
+        else:   # AsciiDoc document.
+            #TODO: Skip leading comment blocks.
+            for line in open(self.blog_file):
+                # Skip blank lines and comment lines.
+                if not re.match(r'(^//)|(^\s*$)', line):
+                    self.title = line.strip()
+                    if self.title.startswith('= '):
+                        self.title = line[2:].strip()
+                    break
 
     def asciidoc2html(self):
         """
@@ -567,14 +575,6 @@ class Blogpost(object):
             post = self.get_post()
         else:
             post = wordpresslib.WordPressPost()
-        # Set post title.
-        if not self.title:
-            if self.docformat() ('html', 'rimu'):
-                die('missing title: use --title option')
-            else:
-                self.set_title_from_blog_file()
-        post.title = self.title
-        assert(self.title)
         # Generate blog content from blog file.
         if self.docformat() == 'html':
             self.content = open(self.blog_file)
@@ -582,6 +582,11 @@ class Blogpost(object):
             self.rimu2html()
         else:
             self.asciidoc2html()
+        if not self.title:
+            self.set_title_from_blog_file()
+        if not self.title:
+            die('missing title: use --title option')
+        post.title = self.title
         # Conditionally upload media files.
         if self.options.media:
             self.process_media()

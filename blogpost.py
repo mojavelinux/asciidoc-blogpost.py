@@ -267,14 +267,25 @@ class Blogpost(object):
                 asciidoc.options(opt[0])
         if OPTIONS.verbose > 1:
             asciidoc.options('--verbose')
-        verbose('asciidoc: options: %r' % asciidoc.options.values)
-        outfile = StringIO.StringIO()
-        asciidoc.execute(self.blog_file, outfile, backend='wordpress')
-        result = outfile.getvalue()
-        result = unicode(result,'utf8')
-        self.content = StringIO.StringIO(result.encode('utf8'))
-        for s in asciidoc.messages:
-            infomsg('asciidoc: %s' % s)
+
+        if OPTIONS.asciidoc == 'asciidoctor':
+            args = ''
+            for opt in asciidoc.options.values:
+                args = args + opt[0] + ' '
+                if not opt[1] is None:
+                    args = args + opt[1] + ' '
+            result = shell('asciidoctor %s -o - "%s"' % (args, self.blog_file))[0]
+            result = unicode(result,'utf8')
+            self.content = StringIO.StringIO(result.encode('utf8'))
+        else:
+            verbose('asciidoc: options: %r' % asciidoc.options.values)
+            outfile = StringIO.StringIO()
+            asciidoc.execute(self.blog_file, outfile, backend='wordpress')
+            result = outfile.getvalue()
+            result = unicode(result,'utf8')
+            self.content = StringIO.StringIO(result.encode('utf8'))
+            for s in asciidoc.messages:
+                infomsg('asciidoc: %s' % s)
 
     def rimu2html(self):
         html = shell('rimuc "%s"' % self.blog_file)[0]
@@ -727,6 +738,9 @@ else:
     parser.add_option('-a', '--attribute',
         action='append', dest='attributes', default=[], metavar='ATTRIBUTE',
         help='set asciidoc attribute value')
+    parser.add_option('--asciidoc',
+        dest='asciidoc', default='asciidoc', metavar='ASCIIDOC',
+        help='set asciidoc implementation')
     parser.add_option('--asciidoc-opt',
         action='append',dest='asciidoc_opts', default=[],
         metavar='ASCIIDOC_OPTION', help='set asciidoc command option')

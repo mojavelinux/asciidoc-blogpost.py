@@ -2,7 +2,7 @@ blogpost README
 ===============
 :Author: Stuart Rackham
 
-
+*Updated* (by Dan Allen): 2013-09-13 +
 *Updated*: 2012-12-31 +
 *Updated*: 2010-10-28 +
 *Updated*: 2010-02-17 +
@@ -33,10 +33,24 @@ id: 93
 url: http://srackham.wordpress.com/2008/05/22/blogpost-media-processing/
 ---------------------------------------------------------------------
 
+To use an alternate AsciiDoc command, first ensure the command is on your
+path. To use the +asciidoctor+ command, first install the gem:
+
+----
+$ gem install asciidoctor
+----
+
+Next, specify the alternate command using the +--asciidoc+ argument:
+
+----
+$ blogpost.py --asciidoc asciidoctor post sample-post.adoc
+----
 
 Status
 ------
-Latest version in http://code.google.com/p/blogpost/[Mercurial
+This fork is available from the https://github.com/mojavelinux/asciidoc-blogpost.py[Git repository at GitHub].
+
+The original version is hosted in the http://code.google.com/p/blogpost/[Mercurial
 repository at Google Code].
 
 See also the http://srackham.wordpress.com/blogpost1/[blogpost(1) man
@@ -85,7 +99,6 @@ As of AsciiDoc 8.6.9 the 'wordpress' backend conf file
 `wordpress.conf` is no longer included in the AsciiDoc distribution --
 it's included here in the blogpost distribution as a backend plugin
 (`conf/wordpress.zip`).
-
 =====================================================================
 
 
